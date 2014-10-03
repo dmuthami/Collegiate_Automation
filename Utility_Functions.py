@@ -10,6 +10,7 @@
 #-------------------------------------------------------------------------------
 import os, sys
 import arcpy
+from arcpy import env
 
 ##------------------Beginning of Functions--------------------------------------------
 
@@ -50,6 +51,31 @@ def assignDomainToField(storesFeatureClass,fieldname, domainName ):
     arcpy.AssignDomainToField_management(storesFeatureClass, fieldname, domainName)
     return ""
 
+##Backup function
+def backupInitialStoresFC (BR_workspace,BR_storesFeatureClass):
+
+    ## Set overwrite in workspace to true
+    arcpy.env.overwriteOutput = True
+
+    #variable pointer to the in-memory feature layer
+    #this is local variable
+    backupInitialStoresFeatureLayer = BR_storesFeatureClass + '_lyr'
+
+    #Backup Feature class of he initial stores layer
+    backupStoresFeatureClass = BR_storesFeatureClass + "_bak"
+
+    # Make a layer from stores feature class
+    arcpy.MakeFeatureLayer_management(BR_storesFeatureClass, backupInitialStoresFeatureLayer)
+
+    #Create feature class from selection
+    arcpy.CopyFeatures_management(backupInitialStoresFeatureLayer,backupStoresFeatureClass)
+
+    #delete the in memory feature layer just in case we need to recreate
+    # feature layer or maybe run script an additional time
+    arcpy.Delete_management(backupInitialStoresFeatureLayer)
+
+    return ""
+
 def main():
     pass
 
@@ -64,4 +90,6 @@ if __name__ == '__main__':
     addValuesToDomain(workspace, domainName, domainDictionary)
 
     assignDomainToField(storesFeatureClass,fieldname, domainName )
+
+    backupInitialStoresFC (BR_workspace,BR_storesFeatureClass)
 

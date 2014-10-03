@@ -15,13 +15,13 @@ import arcpy
 import traceback
 from arcpy import env
 
-
+BE_bullsEye = ""
 ## Interset geocodes with campus boundary
 ## geys bulls eye geocodes
 ## Update collegiate definition field to 0
 ## and hit out
 ##
-def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryFeatureClass):
+def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryFeatureClass, bullsEye):
 
     try:
         ##Try creating the below layer. If it exists in memory then an exception will be thrown
@@ -66,7 +66,7 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
     fields = (collegiate_fieldname)
 
     #Run an update cursor on the collegiate definition field name
-    domainsCodedValue = 0
+    domainsCodedValue = BE_bullsEye
 
     #Call and update bulls eye
     updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields,domainsCodedValue)

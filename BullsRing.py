@@ -42,28 +42,12 @@ BR_linearUnit = ""
 BR_sideType = ""
 BR_endType = ""
 
+BR_nonCollegiate = "" # Non collegiate tool
+BR_bullsEye = ""
+BR_bullsRing = ""
+
 
 ##Define local functions
-
-def backupInitialStoresFC (BR_workspace,BR_storesFeatureClass, BR_collegiateField, BR_BRMDL):
-
-    #variable pointer to the in-memory feature layer
-    backupInitialStoresFeatureLayer = BR_storesFeatureClass + '_lyr'
-
-    #Backup Feature class of he initial stores layer
-    backupStoresFeatureClass = BR_storesFeatureClass + "_bak"
-
-    # Make a layer from stores feature class
-    arcpy.MakeFeatureLayer_management(BR_storesFeatureClass, backupInitialStoresFeatureLayer)
-
-    #Create feature class from selection
-    arcpy.CopyFeatures_management(backupInitialStoresFeatureLayer,backupStoresFeatureClass)
-
-    #delete the in memory feature layer just in case we need to recreate
-    # feature layer or maybe run script an additional time
-    arcpy.Delete_management(backupInitialStoresFeatureLayer)
-
-    return ""
 
 def joinStoresAndBRMDL(BR_workspace,BR_storesFeatureClass, BR_joinField1, BR_joinTable, BR_joinField2):
 
@@ -108,7 +92,7 @@ def intersectBullsRing(BR_workspace,BR_storesFeatureLayer,BR_collegiateField, BR
 
     #Run an update cursor on the collegiate definition field name
 
-    updateCollegiateFieldWithBullsRing(BR_workspace,BR_storesFeatureLayer, fields, BR_codedValue)
+    updateCollegiateFieldWithBullsRing(BR_workspace,BR_storesFeatureLayer, fields, BR_bullsRing)
 
     return ""
 
@@ -153,9 +137,6 @@ def executeBullsRings():
     #variable pointer to the in-memory feature layer
     BR_storesFeatureLayer = BR_storesFeatureClass + '_lyr'
 
-    #Back=up intitial stores feature layer
-    backupInitialStoresFC (BR_workspace,BR_storesFeatureClass, BR_collegiateField, BR_BRMDL)
-
     ##Check that existing feature class doesnt have fields of Bull Ring Master Data List
     ##  If it has then delete them ssince they shall be appended in the next step by joinField method
 
@@ -178,7 +159,7 @@ def executeBullsRings():
                 BR_collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(BR_workspace,BR_collegiateField)
 
                 # Select  Bulls eye records
-                collegiateSQLExp =  BR_collegiateFieldwithDelimeter + " = " + str(0)
+                collegiateSQLExp =  BR_collegiateFieldwithDelimeter + " = " + str(BR_bullsEye)
 
                 # Make a layer from stores feature class
                 arcpy.MakeFeatureLayer_management(BR_storesFeatureClass, BR_storesFeatureLayer)
@@ -271,7 +252,7 @@ def executeBullsRings():
     BR_collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(BR_workspace,BR_collegiateField)
 
     #make selection for bulls eye and bulls ring
-    collegiateSQLExp =  BR_collegiateFieldwithDelimeter + " = " + str(0) + " or " +  BR_collegiateFieldwithDelimeter + " = " + str(1)
+    collegiateSQLExp =  BR_collegiateFieldwithDelimeter + " = " + str(BR_bullsEye) + " or " +  BR_collegiateFieldwithDelimeter + " = " + str(BR_bullsRing)
 
 
     #make a fresh selection here SWITCH_SELECTION
@@ -286,8 +267,8 @@ def executeBullsRings():
     featCount = arcpy.GetCount_management(BR_storesFeatureLayer)
     print "Number of features that are Non-Collegiate: {0}".format(featCount)
 
-    #set update value to 2 for non-collegiate records
-    BR_codedValue = str(2)
+    #set update value to 2 or figure defined in config.ini for non-collegiate records
+    BR_codedValue = str(BR_nonCollegiate)
 
     #Call function to update collegiate field to value 2
     updateCollegiateFieldWithBullsRing(BR_workspace,BR_storesFeatureLayer, BR_collegiateField,  BR_codedValue)
