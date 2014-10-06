@@ -45,106 +45,63 @@ try:
     ##Read from config file
     Configurations.setParameters(configFileLocation)
 
-    ##set global variables
-    #Workspace and workspace related variables
-    workspace = Configurations.Configurations_workspace
-    storesFeatureClass =Configurations.Configurations_storesFeatureClass
-    campusBoundaryFeatureClass = Configurations.Configurations_campusBoundaryFeatureClass
-
-    #Collegiate Defintion domains creation  variables
-    fieldname = Configurations.Configurations_fieldname #Name of field to add to the feature class
-    fieldAlias = Configurations.Configurations_fieldAlias #Field Alias to the field name specified above
-    fieldType = Configurations.Configurations_fieldType
-
-
-
-    ##Set variables for Bullring module
-    #Initial variables initializing
-    BullsRing.BR_workspace =  workspace
-    BullsRing.BR_storesFeatureClass = storesFeatureClass
-    BullsRing.BR_collegiateField = fieldname
-    BullsRing.BR_BRMDL = Configurations.Configurations_BRMDL
-
-    # Set required add domain parameters
-    domainName = Configurations.Configurations_domainName
-    domainDescription = Configurations.Configurations_domainDescription
-    #fieldType as defined above
-    domainType = Configurations.Configurations_domainType
-
-    #Parameters for the add join
-    BullsRing.BR_joinField1 = Configurations.Configurations_collegiateJoinField
-    BullsRing.BR_joinTable = BullsRing.BR_BRMDL
-    BullsRing.BR_joinField2 = Configurations.Configurations_BRMDLJoinField
-    BullsRing.BR_field = Configurations.Configurations_bullRingClass
-
-    #Buffer paramaeters
-    BullsRing.BR_campusBoundaryFeatureClass = campusBoundaryFeatureClass
-    BullsRing.BR_campusBoundaryBuffer = campusBoundaryFeatureClass+"_buffer"
-    BullsRing.BR_bufferDistance = 0
-    BullsRing.BR_distanceField = Configurations.Configurations_distancefield
-    BullsRing.BR_linearUnit = Configurations.Configurations_linearUnit
-    BullsRing.BR_sideType = Configurations.Configurations_sideType
-    BullsRing.BR_endType = Configurations.Configurations_endType
-
-    #Parametres for Bull ring coded value for collegiate definition bull ring
-    bullsEye = Configurations.Configurations_bullsEye
-    bullsRing = Configurations.Configurations_bullsRing
-    nonCollegiate = Configurations.Configurations_nonCollegiate
+    #Name of the buffer feature class
+    BullsRing.BR_campusBoundaryBuffer = Configurations.Configurations_campusBoundaryFeatureClass + "_buffer"
 
     #Store all the domain values in a dictionary with the domain code as the "key" and the
     #domain description as the "value" (domainDictionary[code])
-    domainDictionary = {int(bullsEye) : "Bulls Eye", int(bullsRing) : "Bulls Ring", int(nonCollegiate) : "Non Collegiate"}
+    domainDictionary = {int(Configurations.Configurations_bullsEye) : "Bulls Eye", \
+        int(Configurations.Configurations_bullsRing) : "Bulls Ring", \
+            int(Configurations.Configurations_nonCollegiate) : "Non Collegiate"}
 
     ##  Main script block
     ##-------------------------
 
     #Set workspace variable
     #Supports enterprise, file geodatabases
-    env.workspace = workspace
+    env.workspace = Configurations.Configurations_workspace
 
     #Backup geocodes feature layer
-    Utility_Functions.backupInitialStoresFC (workspace,storesFeatureClass)
+    Utility_Functions.backupInitialStoresFC (Configurations.Configurations_workspace, \
+        Configurations.Configurations_storesFeatureClass)
 
     #Call function to delete BRMDL fields in stores feature class
-    Utility_Functions.deleteBRMDLFieldsInStores(Configurations.Configurations_BRMDL,Configurations.Configurations_storesFeatureClass)
+    Utility_Functions.deleteBRMDLFieldsInStores(Configurations.Configurations_BRMDL, \
+        Configurations.Configurations_storesFeatureClass)
 
     #Call function to add collegiate field
-    Utility_Functions.addField(storesFeatureClass,fieldname,fieldAlias,fieldType)
+    Utility_Functions.addField(Configurations.Configurations_storesFeatureClass, \
+        Configurations.Configurations_fieldname,Configurations.Configurations_fieldAlias,Configurations.Configurations_fieldType)
 
     #Call function to Create Domain, store domain values in a dictionary, and add domain to the
     # feature class and to the collegiate  field
     #Call add domain function
-    Utility_Functions.addDomain(workspace, domainName,domainDescription,fieldType, domainType)
+    Utility_Functions.addDomain(Configurations.Configurations_workspace, \
+        Configurations.Configurations_domainName,Configurations.Configurations_domainDescription \
+        ,Configurations.Configurations_fieldType, \
+            Configurations.Configurations_domainType)
 
     #Call assign domain values function
-    Utility_Functions.addValuesToDomain(workspace, domainName, domainDictionary)
+    Utility_Functions.addValuesToDomain(Configurations.Configurations_workspace, \
+        Configurations.Configurations_domainName, domainDictionary)
 
     #Call assign domain to field
     #Call function here
-    Utility_Functions.assignDomainToField(storesFeatureClass,fieldname, domainName)
+    Utility_Functions.assignDomainToField(Configurations.Configurations_storesFeatureClass, \
+        Configurations.Configurations_fieldname, Configurations.Configurations_domainName)
 
 
     #Call intersect to get collegiate bull eyes
-    #Set Bulls Eye Parameter
-    BullsEye.BE_bullsEye =bullsEye
-
     #Call function here
-    BullsEye.intersect(workspace,storesFeatureClass,fieldname, campusBoundaryFeatureClass, bullsEye)
+    BullsEye.intersect(Configurations.Configurations_workspace, \
+        Configurations.Configurations_storesFeatureClass,Configurations.Configurations_fieldname, \
+            Configurations.Configurations_campusBoundaryFeatureClass, Configurations.Configurations_bullsEye)
 
 
-
-    ##Run Bulls eye and non collegiate stores analysis
-    #set some parameters here
-
-    BullsRing.BR_nonCollegiate = nonCollegiate
-    BullsRing.BR_bullsEye = bullsEye
-    BullsRing.BR_bullsRing = bullsRing
-
-    #execute Bulls Ring
+    #Run Bulls eye and non collegiate stores analysis
+    #execute Bulls Ring and non collegiate records too
     BullsRing.executeBullsRings();
-    print "Am done with Bull Ring"
-
-
+    print "Am done with Bull Ring\n"
     print "\nCollegiate Definition run successfully"
 
 except:

@@ -16,6 +16,9 @@ import traceback
 from arcpy import env
 import numpy
 
+##Custom module containing functions
+import Configurations
+
 ##define variables here
 BR_workspace = ""
 BR_storesFeatureClass = ""
@@ -49,14 +52,14 @@ BR_bullsRing = ""
 
 ##Define local functions
 
-def joinStoresAndBRMDL(BR_workspace,BR_storesFeatureClass, BR_joinField1, BR_joinTable, BR_joinField2):
+def joinStoresAndBRMDL(workspace,storesFeatureClass, joinField1, joinTable, joinField2):
     try:
         # Disable qualified field names which is the default for add join tool
         env.qualifiedFieldNames = False
 
         # Join two feature classes by the zonecode field and only carry
         # over the land use and land cover fields
-        arcpy.JoinField_management (BR_storesFeatureClass, BR_joinField1, BR_joinTable, BR_joinField2)
+        arcpy.JoinField_management (storesFeatureClass, joinField1, joinTable, joinField2)
 
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
@@ -79,10 +82,10 @@ def joinStoresAndBRMDL(BR_workspace,BR_storesFeatureClass, BR_joinField1, BR_joi
 
     return ""
 
-def createUniqueBRMD(BR_table,BR_field):
+def createUniqueBRMD(table,field):
     try:
-        data = arcpy.da.TableToNumPyArray(BR_table, [BR_field])
-        BR_uniqueBullringClassList = numpy.unique(data[BR_field])
+        data = arcpy.da.TableToNumPyArray(table, [field])
+        uniqueBullringClassList = numpy.unique(data[field])
 
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
@@ -103,15 +106,15 @@ def createUniqueBRMD(BR_table,BR_field):
             print pymsg
             print "\n" +msgs
 
-    return BR_uniqueBullringClassList
+    return uniqueBullringClassList
 
-def createCampusBuffer(BR_campusBoundaryFeatureClass, BR_campusBoundaryBuffer, BR_bufferDistance, BR_linearUnit, BR_sideType, BR_endType):
+def createCampusBuffer(campusBoundaryFeatureClass, campusBoundaryBuffer, bufferDistance, linearUnit, sideType, endType):
     try:
         # Buffer the campus boundary based on the bullring class buffer distance provided
-        BR_bufferDistance2 = str(BR_bufferDistance) + " " + str(BR_linearUnit)
+        bufferDistance2 = str(bufferDistance) + " " + str(linearUnit)
 
         # Run buffer analysis tool
-        arcpy.Buffer_analysis(BR_campusBoundaryFeatureClass, BR_campusBoundaryBuffer, BR_bufferDistance2, BR_sideType, BR_endType)
+        arcpy.Buffer_analysis(campusBoundaryFeatureClass, campusBoundaryBuffer, bufferDistance2, sideType, endType)
 
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
@@ -134,22 +137,22 @@ def createCampusBuffer(BR_campusBoundaryFeatureClass, BR_campusBoundaryBuffer, B
 
     return ""
 
-def intersectBullsRing(BR_workspace,BR_storesFeatureLayer,BR_collegiateField, BR_campusBoundaryBuffer, BR_bullRingClass):
+def intersectBullsRing(workspace,storesFeatureLayer,collegiateField, campusBoundaryBuffer, bullRingClass):
     try:
         #Do an intersect to get Bulls Rings collegiate stores
-        arcpy.SelectLayerByLocation_management(BR_storesFeatureLayer, 'intersect', BR_campusBoundaryBuffer, "","SUBSET_SELECTION")
+        arcpy.SelectLayerByLocation_management(storesFeatureLayer, 'intersect', campusBoundaryBuffer, "","SUBSET_SELECTION")
 
         # Determine the number of selected features in the stores feature layer
         # Syntax: arcpy.GetCount_management (in_rows)
-        featCount = arcpy.GetCount_management(BR_storesFeatureLayer)
-        print "Number of store features: {0}  that intersect bull Ring class {1}".format(featCount,BR_bullRingClass)
+        featCount = arcpy.GetCount_management(storesFeatureLayer)
+        print "Number of store features: {0}  that intersect bull Ring class {1}".format(featCount,bullRingClass)
 
         #Define the fields object for the update cursor
-        fields = (BR_collegiateField)
+        fields = (collegiateField)
 
         #Run an update cursor on the collegiate definition field name
 
-        updateCollegiateFieldWithBullsRing(BR_workspace,BR_storesFeatureLayer, fields, BR_bullsRing)
+        updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, Configurations.Configurations_bullsRing)
 
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
@@ -171,10 +174,10 @@ def intersectBullsRing(BR_workspace,BR_storesFeatureLayer,BR_collegiateField, BR
             print "\n" +msgs
     return ""
 
-def updateCollegiateFieldWithBullsRing(BR_workspace,BR_storesFeatureLayer, fields, updateValue):
+def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, updateValue):
     try:
         # Start an edit session. Must provide the worksapce.
-        edit = arcpy.da.Editor(BR_workspace)
+        edit = arcpy.da.Editor(workspace)
 
         # Edit session is started without an undo/redo stack for versioned data
         #  (for second argument, use False for unversioned data)
@@ -185,7 +188,7 @@ def updateCollegiateFieldWithBullsRing(BR_workspace,BR_storesFeatureLayer, field
         edit.startOperation()
 
         #Update cursor goes here
-        with arcpy.da.UpdateCursor(BR_storesFeatureLayer, fields) as cursor:
+        with arcpy.da.UpdateCursor(storesFeatureLayer, fields) as cursor:
             for row in cursor:# loops per record in the recordset and returns an aray of objects
 
                 ##Set bull ring value it is set to default
@@ -228,17 +231,19 @@ def executeBullsRings():
         arcpy.env.overwriteOutput = True
 
         #variable pointer to the in-memory feature layer
-        BR_storesFeatureLayer = BR_storesFeatureClass + '_lyr'
+        storesFeatureLayer = Configurations.Configurations_storesFeatureClass + '_lyr'
 
         ##Check that existing feature class doesnt have fields of Bull Ring Master Data List
         ##  If it has then delete them ssince they shall be appended in the next step by joinField method
 
         #Join Field of Bulls Ring Master Data List to the potential bulls ring feature layer/class
-        joinStoresAndBRMDL(BR_workspace,BR_storesFeatureClass, BR_joinField1, BR_joinTable, BR_joinField2)
+        joinStoresAndBRMDL(Configurations.Configurations_workspace,Configurations.Configurations_storesFeatureClass, \
+            Configurations.Configurations_collegiateJoinField, Configurations.Configurations_BRMDL, \
+             Configurations.Configurations_BRMDLJoinField)
 
         # create a data dictionary from bull ring class and distance from
         #  Bull Ring Master Datalist (BRMDL)
-        list = createUniqueBRMD(BR_BRMDL,BR_field)
+        list = createUniqueBRMD(Configurations.Configurations_BRMDL,Configurations.Configurations_bullRingClass)
 
         #For each unique distance
         for item in list:
@@ -249,46 +254,51 @@ def executeBullsRings():
 
                     ##Select non-bull ring features from feature layer
                     #collegiate definition
-                    BR_collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(BR_workspace,BR_collegiateField)
+                    collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
+                        Configurations.Configurations_fieldname)
 
                     # Select  Bulls eye records
-                    collegiateSQLExp =  BR_collegiateFieldwithDelimeter + " = " + str(BR_bullsEye)
+                    collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye)
 
                     # Make a layer from stores feature class
-                    arcpy.MakeFeatureLayer_management(BR_storesFeatureClass, BR_storesFeatureLayer)
+                    arcpy.MakeFeatureLayer_management(Configurations.Configurations_storesFeatureClass, storesFeatureLayer)
 
                     #make a fresh selection here
-                    arcpy.SelectLayerByAttribute_management(BR_storesFeatureLayer, "NEW_SELECTION", collegiateSQLExp)
+                    arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "NEW_SELECTION", collegiateSQLExp)
 
                     #Switch selection to select only non Bulls eye record
-                    arcpy.SelectLayerByAttribute_management(BR_storesFeatureLayer, "SWITCH_SELECTION")
+                    arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SWITCH_SELECTION")
 
                     # Determine the number of selected features in the stores feature layer
                     # Syntax: arcpy.GetCount_management (in_rows)
-                    featCount = arcpy.GetCount_management(BR_storesFeatureLayer)
+                    featCount = arcpy.GetCount_management(storesFeatureLayer)
                     print "Number of features: {0}".format(featCount)
 
                     ##From Selection above,Select only non Bulls eye records for the bull ring held in variable named "item"
-                    collegiateSQLExp = BR_field + " = " + str(item)
+                    bullRingClassFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
+                        Configurations.Configurations_bullRingClass)
+
+                    collegiateSQLExp = bullRingClassFieldwithDelimeter + " = " + str(item)
 
                     #make a fresh selection here
-                    arcpy.SelectLayerByAttribute_management(BR_storesFeatureLayer, "SUBSET_SELECTION", collegiateSQLExp)
+                    arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SUBSET_SELECTION", collegiateSQLExp)
 
                     # Determine the number of selected features in the stores feature layer
                     # Syntax: arcpy.GetCount_management (in_rows)
-                    featCount = arcpy.GetCount_management(BR_storesFeatureLayer)
+                    featCount = arcpy.GetCount_management(storesFeatureLayer)
                     print "Number of features: {0}".format(featCount)
 
                     ##Get buffer distance from the feature class
                     # Create an expression with proper delimiters for the bull ring class
-                    expression = arcpy.AddFieldDelimiters(BR_storesFeatureClass, BR_field) + ' = ' + str(item)
+                    expression = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
+                     Configurations.Configurations_bullRingClass) + ' = ' + str(item)
 
                     bufferDistance = 0;#initialize variable first
 
                     # Use SearchCursor with list comprehension to return a
                     # unique set of values in the specified field
 
-                    values = [row[0] for row in arcpy.da.SearchCursor(BR_storesFeatureClass, [BR_distanceField] \
+                    values = [row[0] for row in arcpy.da.SearchCursor(Configurations.Configurations_storesFeatureClass, [Configurations.Configurations_distancefield] \
                         , where_clause=expression)]
 
                     #Get unique values
@@ -300,23 +310,25 @@ def executeBullsRings():
 
                     ##create buffer feature layer from the campus boundaries
 
-                    BR_bufferDistance = bufferDistance
-
                     #Check that buffer distance is greater than 1
-                    if float(BR_bufferDistance) > 0.0 :
+                    if float(bufferDistance) > 0.0 :
 
 
 
                         #Call function to create campus buffer
-                        createCampusBuffer(BR_campusBoundaryFeatureClass, BR_campusBoundaryBuffer, BR_bufferDistance, BR_linearUnit, BR_sideType, BR_endType)
+                        createCampusBuffer(Configurations.Configurations_campusBoundaryFeatureClass, BR_campusBoundaryBuffer, \
+                         bufferDistance, Configurations.Configurations_linearUnit, \
+                         Configurations.Configurations_sideType, Configurations.Configurations_endType)
 
                         ##intersect (with non bullring feature layer for the correct channel/segment) and if intersect returns something useful then set collegiate field to 1
 
                         #Pass Bull ring Class variable
-                        BR_bullRingClass = str(item)
+                        bullRingClass = str(item)
 
                         #Updates of the selected records is done by calling another function within intersect called "updateCollegiateFieldWithBullsRing"
-                        intersectBullsRing(BR_workspace,BR_storesFeatureLayer,BR_collegiateField, BR_campusBoundaryBuffer, BR_bullRingClass)
+                        intersectBullsRing(Configurations.Configurations_workspace, \
+                            storesFeatureLayer,Configurations.Configurations_fieldname, \
+                                BR_campusBoundaryBuffer, bullRingClass)
                     ##Loop until the end and
                     print ""
             except:
@@ -342,33 +354,35 @@ def executeBullsRings():
         ##collegiate field to non
 
         #collegiate definition
-        BR_collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(BR_workspace,BR_collegiateField)
+        collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace,Configurations.Configurations_fieldname)
 
         #make selection for bulls eye and bulls ring
-        collegiateSQLExp =  BR_collegiateFieldwithDelimeter + " = " + str(BR_bullsEye) + " or " +  BR_collegiateFieldwithDelimeter + " = " + str(BR_bullsRing)
+        collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " or " + \
+         collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
 
 
         #make a fresh selection here SWITCH_SELECTION
-        arcpy.SelectLayerByAttribute_management(BR_storesFeatureLayer, "NEW_SELECTION", collegiateSQLExp)
+        arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "NEW_SELECTION", collegiateSQLExp)
 
         #Switch selection to pick out non-collegiate records only
 
-        arcpy.SelectLayerByAttribute_management(BR_storesFeatureLayer, "SWITCH_SELECTION")
+        arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SWITCH_SELECTION")
 
         # Determine the number of selected features in the stores feature layer
         # Syntax: arcpy.GetCount_management (in_rows)
-        featCount = arcpy.GetCount_management(BR_storesFeatureLayer)
+        featCount = arcpy.GetCount_management(storesFeatureLayer)
         print "Number of features that are Non-Collegiate: {0}".format(featCount)
 
         #set update value to 2 or figure defined in config.ini for non-collegiate records
-        BR_codedValue = str(BR_nonCollegiate)
+        codedValue = str(Configurations.Configurations_nonCollegiate)
 
         #Call function to update collegiate field to value 2
-        updateCollegiateFieldWithBullsRing(BR_workspace,BR_storesFeatureLayer, BR_collegiateField,  BR_codedValue)
+        updateCollegiateFieldWithBullsRing(Configurations.Configurations_workspace,storesFeatureLayer, \
+            Configurations.Configurations_fieldname,  codedValue)
 
         #delete the in memory feature layer just in case we need to recreate
         # feature layer or maybe run script an additional time
-        arcpy.Delete_management(BR_storesFeatureLayer)
+        arcpy.Delete_management(storesFeatureLayer)
 
 
     except:

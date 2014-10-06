@@ -15,7 +15,11 @@ import arcpy
 import traceback
 from arcpy import env
 
-BE_bullsEye = ""
+##Custom module containing functions
+import Configurations
+
+#Configurations.Configurations_bullsEye;
+
 ## Interset geocodes with campus boundary
 ## geys bulls eye geocodes
 ## Update collegiate definition field to 0
@@ -66,7 +70,7 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
         fields = (collegiate_fieldname)
 
         #Run an update cursor on the collegiate definition field name
-        domainsCodedValue = BE_bullsEye
+        domainsCodedValue = Configurations.Configurations_bullsEye
 
         #Call and update bulls eye
         updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields,domainsCodedValue)
