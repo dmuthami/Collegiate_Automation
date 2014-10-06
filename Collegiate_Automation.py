@@ -1,16 +1,11 @@
 ######################################################################
-## Update Stand No Script
-## Attach script in ArcMap in a custom toolbox
-## Run script as a script tool
 ##
-##Challenge:Create Geoprocessing service for running on the web.
+##
+## Collegiate Automation Main Module
+##
 ##
 ######################################################################
 
-##  Compute Stand No
-##  Select OBJECTID, Stand_No and Local_Authority ID Fields from a parcels feature class that participates in
-##  parcel fabric
-##  Need to obtain edit lock on the respective feature dataset/parcel fabric
 
 ##  Import ArcPy module: Provides access to ArcGIS powerful ArcObjects
 ##  Import sys module : module provides access to some variables used or maintained by the interpreter and to functions that interact strongly with the interpreter

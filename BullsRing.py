@@ -6,7 +6,7 @@
 #
 # Created:     26/09/2014
 # Copyright:   (c) dmuthami 2014
-# Licence:     <your licence>
+# Licence:     GPL
 #-------------------------------------------------------------------------------
 
 #Import arcpy module
