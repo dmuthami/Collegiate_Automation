@@ -102,178 +102,48 @@ try:
     #Supports enterprise, file geodatabases
     env.workspace = workspace
 
+    #Backup geocodes feature layer
+    Utility_Functions.backupInitialStoresFC (workspace,storesFeatureClass)
 
-    try:
-
-        #Backup geocodes feature layer
-        Utility_Functions.backupInitialStoresFC (workspace,storesFeatureClass)
-
-    except:
-        ## Return any Python specific errors and any error returned by the geoprocessor
-        ##
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
-
-        ##dd custom informative message to the Python script tool
-        arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-        arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-
-        ##For debugging purposes only
-        ##To be commented on python script scheduling in Windows
-        print pymsg
-        print "\n" +msgs
+    #Call function to delete BRMDL fields in stores feature class
+    Utility_Functions.deleteBRMDLFieldsInStores(Configurations.Configurations_BRMDL,Configurations.Configurations_storesFeatureClass)
 
     #Call function to add collegiate field
-    try:
-        Utility_Functions.addField(storesFeatureClass,fieldname,fieldAlias,fieldType)
-    except:
-        ## Return any Python specific errors and any error returned by the geoprocessor
-        ##
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
-
-        ##dd custom informative message to the Python script tool
-        arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-        arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-
-        ##For debugging purposes only
-        ##To be commented on python script scheduling in Windows
-        print pymsg
-        print "\n" +msgs
+    Utility_Functions.addField(storesFeatureClass,fieldname,fieldAlias,fieldType)
 
     #Call function to Create Domain, store domain values in a dictionary, and add domain to the
     # feature class and to the collegiate  field
+    #Call add domain function
+    Utility_Functions.addDomain(workspace, domainName,domainDescription,fieldType, domainType)
 
-    try:
-        #Call add domain function
-        Utility_Functions.addDomain(workspace, domainName,domainDescription,fieldType, domainType)
-    except:
-        ## Return any Python specific errors and any error returned by the geoprocessor
-        ##
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
-
-        ##dd custom informative message to the Python script tool
-        arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-        arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-
-        ##For debugging purposes only
-        ##To be commented on python script scheduling in Windows
-        print pymsg
-        print "\n" +msgs
-
-
-
-
-    try:
-        #Call assign domain values function
-        Utility_Functions.addValuesToDomain(workspace, domainName, domainDictionary)
-    except:
-        ## Return any Python specific errors and any error returned by the geoprocessor
-        ##
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
-
-        ##dd custom informative message to the Python script tool
-        arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-        arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-
-        ##For debugging purposes only
-        ##To be commented on python script scheduling in Windows
-        print pymsg
-        print "\n" +msgs
-
+    #Call assign domain values function
+    Utility_Functions.addValuesToDomain(workspace, domainName, domainDictionary)
 
     #Call assign domain to field
-    try:
-        #Call function here
-        Utility_Functions.assignDomainToField(storesFeatureClass,fieldname, domainName )
-    except:
-        ## Return any Python specific errors and any error returned by the geoprocessor
-        ##
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
-
-        ##dd custom informative message to the Python script tool
-        arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-        arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-
-        ##For debugging purposes only
-        ##To be commented on python script scheduling in Windows
-        print pymsg
-        print "\n" +msgs
+    #Call function here
+    Utility_Functions.assignDomainToField(storesFeatureClass,fieldname, domainName)
 
 
     #Call intersect to get collegiate bull eyes
-    try:
+    #Set Bulls Eye Parameter
+    BullsEye.BE_bullsEye =bullsEye
 
-        #Set Bulls Eye Parameter
-        BullsEye.BE_bullsEye =bullsEye
+    #Call function here
+    BullsEye.intersect(workspace,storesFeatureClass,fieldname, campusBoundaryFeatureClass, bullsEye)
 
-        #Call function here
-        BullsEye.intersect(workspace,storesFeatureClass,fieldname, campusBoundaryFeatureClass, bullsEye)
-
-    except:
-        ## Return any Python specific errors and any error returned by the geoprocessor
-        ##
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
-
-        ##Add custom informative message to the Python script tool
-        arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-        arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-
-        ##For debugging purposes only
-        ##To be commented on python script scheduling in Windows
-        print pymsg
-        print "\n" +msgs
 
 
     ##Run Bulls eye and non collegiate stores analysis
-    try:
-        #set some parameters here
+    #set some parameters here
 
-        BullsRing.BR_nonCollegiate = nonCollegiate
-        BullsRing.BR_bullsEye = bullsEye
-        BullsRing.BR_bullsRing = bullsRing
+    BullsRing.BR_nonCollegiate = nonCollegiate
+    BullsRing.BR_bullsEye = bullsEye
+    BullsRing.BR_bullsRing = bullsRing
 
-        BullsRing.executeBullsRings();
-        print "Am done with Bull Ring"
-    except:
-        ## Return any Python specific errors and any error returned by the geoprocessor
-        ##
-        tb = sys.exc_info()[2]
-        tbinfo = traceback.format_tb(tb)[0]
-        pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
-                str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-        msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+    #execute Bulls Ring
+    BullsRing.executeBullsRings();
+    print "Am done with Bull Ring"
 
-        ##Add custom informative message to the Python script tool
-        arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-        arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
-
-        ##For debugging purposes only
-        ##To be commented on python script scheduling in Windows
-        print pymsg
-        print "\n" +msgs
 
     print "\nCollegiate Definition run successfully"
 
@@ -282,7 +152,7 @@ except:
     ##
     tb = sys.exc_info()[2]
     tbinfo = traceback.format_tb(tb)[0]
-    pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
+    pymsg = "PYTHON ERRORS:\n Main FunctionTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
             str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
     msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 

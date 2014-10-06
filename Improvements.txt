@@ -2,13 +2,17 @@ Variables from Config File
 
 Run back-up ahead of bulls eye
 
-Assign a bull ring number 
+Assign a bull ring number
 
 test plan
 
-DISCONNECT USERS AFTER SENDING E-mail
+***DISCONNECT USERS AFTER SENDING E-mail
 
 Run on Enterprise
 
 Test on Friday
+
+*** all variables to read from one configuration file
+
+*** Output format
 
