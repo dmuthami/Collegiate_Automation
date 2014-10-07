@@ -38,6 +38,7 @@ try:
         configFileLocation=r"E:\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Python_Scripts\GitHub\Collegiate_Automation\Config.ini"
 
     ##Read from config file
+    #If for any reason an exception is thrown here then subsequent code will not be executed
     Configurations.setParameters(configFileLocation)
 
     #Name of the buffer feature class
@@ -97,6 +98,14 @@ try:
     #execute Bulls Ring and non collegiate records too
     BullsRing.executeBullsRings();
     print "Am done with Bull Ring\n"
+
+    #Export to text file#
+    textFile = Configurations.Configurations_outputFolder + "/" +  \
+     Configurations.Configurations_outputTextFile + ".txt"
+
+    Utility_Functions.exportToASCII(Configurations.Configurations_workspace, \
+        Configurations.Configurations_storesFeatureClass,textFile)
+
     print "\nCollegiate Definition run successfully"
 
 except:

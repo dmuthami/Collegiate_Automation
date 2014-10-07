@@ -10,6 +10,9 @@
 #-------------------------------------------------------------------------------
 import ConfigParser
 
+#Import global traceback here
+import traceback
+
 #Workspace global variables
 Configurations_workspace = ""
 Configurations_storesFeatureClass = ""
@@ -43,6 +46,10 @@ Configurations_linearUnit = ""
 Configurations_sideType = ""
 Configurations_endType = ""
 
+#buffer parameters global variables
+Configurations_outputFolder = ""
+Configurations_outputTextFile = ""
+
 def setParameters(configFileLocation):
     #Dirty way of working with global variables
     global Configurations_Config #Set global variable.Usually not favourable in Python
@@ -65,6 +72,9 @@ def setParameters(configFileLocation):
     setJoinFieldParameters()
 
     setBufferParameters()
+
+    #Call  function to set parameters required to export aoutput to text file
+    setOutputParameters()
 
     return ""
 
@@ -107,6 +117,19 @@ def setCollegiateFieldParameters():
     global Configurations_fieldType # Needed to modify global copy of C_fieldType
     Configurations_fieldType = Configurations_Config.get('Collegiate_Field','fieldType')
 
+
+    return ""
+
+def setOutputParameters():
+
+    #read field name for storing collegiate status  from config file location
+    global Configurations_outputFolder # Needed to modify global copy of Configurations_outputFolder
+    Configurations_outputFolder = Configurations_Config.get('OutPut','outputFolder')
+
+
+    #read field alias name for collegiate status field from config file location
+    global Configurations_outputTextFile # Needed to modify global copy of Configurations_outputTextFile
+    Configurations_outputTextFile = Configurations_Config.get('OutPut','outputTextFile')
 
     return ""
 
