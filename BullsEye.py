@@ -17,6 +17,7 @@ from arcpy import env
 
 ##Custom module containing functions
 import Configurations
+from BullsRing import updateIPEDSID as updateIPEDSIDForBullsEye
 
 #Configurations.Configurations_bullsEye;
 
@@ -74,6 +75,10 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
 
         #Call and update bulls eye
         updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields,domainsCodedValue)
+
+        #Call function to update the IPEDS ID
+        updateIPEDSID(workspace,storesFeatureLayer,Configurations.Configurations_IPEDSFieldName,campusBoundaryFeatureClass, \
+         Configurations.Configurations_CampusBoundaryIPEDSID)
 
         #delete the in memory feature layer just in case we need to recreate
         # feature layer or maybe run script an additional time
@@ -149,6 +154,13 @@ def updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields, doma
 
     return ""
 
+#Function calls another module that updates the IPEDS ID
+def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS):
+
+    #Function calls another module that updates the IPEDS ID
+    updateIPEDSIDForBullsEye(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS)
+
+    return ""
 ##-------------Main----------------
 def main():
     pass

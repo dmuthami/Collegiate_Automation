@@ -45,11 +45,6 @@ BR_linearUnit = ""
 BR_sideType = ""
 BR_endType = ""
 
-BR_nonCollegiate = "" # Non collegiate tool
-BR_bullsEye = ""
-BR_bullsRing = ""
-
-
 ##Define local functions
 
 def joinStoresAndBRMDL(workspace,storesFeatureClass, joinField1, joinTable, joinField2):
@@ -204,12 +199,102 @@ def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, upd
         # Stop the edit session and save the changes
         #Compulsory for release of locks arising from edit session. NB. Singleton principle is observed here
         edit.stopEditing(True)
+
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
             ##
             tb = sys.exc_info()[2]
             tbinfo = traceback.format_tb(tb)[0]
             pymsg = "PYTHON ERRORS:\n updateCollegiateFieldWithBullsRing Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
+                    str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
+                    "Line {0}".format(tb.tb_lineno)
+            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+
+            ##Add custom informative message to the Python script tool
+            arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
+            arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
+
+            ##For debugging purposes only
+            ##To be commented on python script scheduling in Windows
+            print pymsg
+            print "\n" +msgs
+
+    return ""
+
+def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS):
+    try:
+        #variable pointer to the in-memory feature layer
+        campusBoundaryLayer = campusBoundaryBuffer + '_lyr'
+
+        # Make a layer from stores feature class
+        arcpy.MakeFeatureLayer_management(campusBoundaryBuffer, campusBoundaryLayer)
+
+        #Get spatial reference of the stores feature class
+        desc = arcpy.Describe(storesFeatureLayer)
+        sREF = desc.spatialReference
+
+        #Fields object
+        fields =[IPEDSID,"SHAPE@XY"]
+
+        # Start an edit session. Must provide the worksapce.
+        edit = arcpy.da.Editor(workspace)
+
+        # Edit session is started without an undo/redo stack for versioned data
+        #  (for second argument, use False for unversioned data)
+        #Compulsory for above feature class participating in a complex data such as parcel fabric
+        edit.startEditing(False, False)
+
+        # Start an edit operation
+        edit.startOperation()
+
+        #Update cursor goes here
+        with arcpy.da.UpdateCursor(storesFeatureLayer, fields) as cursor:
+            for row in cursor:# loops per record in the recordset and returns an aray of objects
+                #Create Geomtery object from first currect row
+
+                x, y = row[1] #Get x and y coordinates
+                point = arcpy.Point(x, y ) #create point object
+                pointGeom =arcpy.PointGeometry(point,sREF) #point geometry object but with spatial referencce of stores featurelayer
+                #intersect geometry object and current campus buffer to get IPED ID for the store that falls within it
+
+                arcpy.SelectLayerByLocation_management(campusBoundaryLayer, 'intersect', pointGeom, "","NEW_SELECTION")
+
+                # Determine the number of selected features in the stores feature layer
+                # Syntax: arcpy.GetCount_management (in_rows)
+                featCount = arcpy.GetCount_management(campusBoundaryLayer)
+                print "\nNumber of Campus Boundary features: {0}".format(featCount)
+
+                ipedsID = ""# Campus boundary IPEDS
+
+                #Get only top selected row.Might return more than one campus IPED ID
+                #get IPED ID
+                for roww in arcpy.da.SearchCursor(campusBoundaryLayer, [campusBoundaryIPEDS]):
+                    ipedsID = roww[0]
+                    break #forcefully leave cursor after only first read
+
+                #Update stores feature layer by placing IPED
+                row[0] = int(ipedsID) # need to be as per the coded values of the domain called collegiate_definition
+
+                # Update the cursor with the updated row object that contains now the new record
+                cursor.updateRow(row)
+
+        # Stop the edit operation.and commit the changes
+        edit.stopOperation()
+
+        # Stop the edit session and save the changes
+        #Compulsory for release of locks arising from edit session. NB. Singleton principle is observed here
+        edit.stopEditing(True)
+
+        #delete the in memory feature layer just in case we need to recreate
+        # feature layer or maybe run script an additional time
+        arcpy.Delete_management(campusBoundaryLayer)
+
+    except:
+            ## Return any Python specific errors and any error returned by the geoprocessor
+            ##
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\n updateIPEDSID() Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
             msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
@@ -280,7 +365,7 @@ def executeBullsRings():
 
                     collegiateSQLExp = bullRingClassFieldwithDelimeter + " = " + str(item)
 
-                    #make a fresh selection here
+                    #make a selection from existing selection here for the specific bull ring class
                     arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SUBSET_SELECTION", collegiateSQLExp)
 
                     # Determine the number of selected features in the stores feature layer
@@ -329,6 +414,10 @@ def executeBullsRings():
                         intersectBullsRing(Configurations.Configurations_workspace, \
                             storesFeatureLayer,Configurations.Configurations_fieldname, \
                                 BR_campusBoundaryBuffer, bullRingClass)
+
+                        #Call function to append IPEDs here
+                        updateIPEDSID(Configurations.Configurations_workspace,storesFeatureLayer,Configurations.Configurations_IPEDSFieldName, \
+                            BR_campusBoundaryBuffer, Configurations.Configurations_CampusBoundaryIPEDSID)
                     ##Loop until the end and
                     print ""
             except:
@@ -415,3 +504,6 @@ if __name__ == '__main__':
 
     #Run executor
     executeBullsRings()
+
+    #Updates IPEDSID
+    updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS)

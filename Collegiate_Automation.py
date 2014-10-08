@@ -69,6 +69,11 @@ try:
     Utility_Functions.addField(Configurations.Configurations_storesFeatureClass, \
         Configurations.Configurations_fieldname,Configurations.Configurations_fieldAlias,Configurations.Configurations_fieldType)
 
+    #Call function to add IPEDS ID Field
+    Utility_Functions.addField(Configurations.Configurations_storesFeatureClass, \
+        Configurations.Configurations_IPEDSFieldName,Configurations.Configurations_IPEDSFieldAlias, \
+            Configurations.Configurations_IPEDSFieldType)
+
     #Call function to Create Domain, store domain values in a dictionary, and add domain to the
     # feature class and to the collegiate  field
     #Call add domain function
