@@ -1,18 +1,20 @@
-Variables from Config File
+Read all Variables from Config File
 
 Run back-up ahead of bulls eye
 
 Assign a bull ring number
 
-test plan
+Test plan
+	Test with Results obtained from ArcMap
+	Conduct Unit tests ***
 
-***DISCONNECT USERS AFTER SENDING E-mail
+Run on Enterprise Geodatabases
 
-Run on Enterprise
+Error handling
 
-Test on Friday
+Output format. Saving as *.txt file as per required fields
 
-*** all variables to read from one configuration file
+DISCONNECT USERS AFTER SENDING E-mail ***
 
-*** Output format
-
+Error logging ***
+*** (Means item is pending)

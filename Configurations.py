@@ -39,6 +39,7 @@ Configurations_collegiateJoinField = ""
 Configurations_BRMDLJoinField = ""
 Configurations_domainType = ""
 Configurations_bullRingClass = ""
+Configurations_BullRingClassFieldAlias = ""
 
 #buffer parameters global variables
 Configurations_distancefield = ""
@@ -55,6 +56,9 @@ Configurations_CampusBoundaryIPEDSID = ""
 #buffer parameters global variables
 Configurations_outputFolder = ""
 Configurations_outputTextFile = ""
+Configurations_OBJECTIDFieldAlias = ""
+Configurations_storeIDFieldAlias= ""
+Configurations_storeIDField= ""
 
 def setParameters(configFileLocation):
     #Dirty way of working with global variables
@@ -73,8 +77,10 @@ def setParameters(configFileLocation):
 
     setDomainParameters()
 
+    #Domain codes
     setDomainCodes()
 
+    #Join field parameters plus and bullring variables
     setJoinFieldParameters()
 
     setBufferParameters()
@@ -152,6 +158,18 @@ def setOutputParameters():
     global Configurations_outputTextFile # Needed to modify global copy of Configurations_outputTextFile
     Configurations_outputTextFile = Configurations_Config.get('OutPut','outputTextFile')
 
+    #read field name for storing collegiate status  from config file location
+    global Configurations_OBJECTIDFieldAlias # Needed to modify global copy of Configurations_OBJECTIDFieldAlias
+    Configurations_OBJECTIDFieldAlias = Configurations_Config.get('OutPut','OBJECTIDFieldAlias')
+
+    #read field alias name for collegiate status field from config file location
+    global Configurations_storeIDFieldAlias # Needed to modify global copy of Configurations_storeIDFieldAlias
+    Configurations_storeIDFieldAlias = Configurations_Config.get('OutPut','storeIDFieldAlias')
+
+    #read field alias name for store id field from config file location
+    global Configurations_storeIDField # Needed to modify global copy of Configurations_storeIDField
+    Configurations_storeIDField = Configurations_Config.get('OutPut','storeIDField')
+
     return ""
 
 def setDomainParameters():
@@ -203,6 +221,10 @@ def setJoinFieldParameters():
     #read field data type for bull ring class field from config file location
     global Configurations_bullRingClass # Needed to modify global copy of Configurations_bullRingClass
     Configurations_bullRingClass = Configurations_Config.get('Join_Field_Parameters','BullRingClass')
+
+    #read field data type for colegiate status field from config file location
+    global Configurations_BullRingClassFieldAlias # Needed to modify global copy of Configurations_BullRingClassFieldAlias
+    Configurations_BullRingClassFieldAlias = Configurations_Config.get('Join_Field_Parameters','BullRingClassFieldAlias')
 
     return ""
 

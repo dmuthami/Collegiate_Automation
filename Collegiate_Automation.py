@@ -108,8 +108,19 @@ try:
     textFile = Configurations.Configurations_outputFolder + "/" +  \
      Configurations.Configurations_outputTextFile + ".txt"
 
-    Utility_Functions.exportToASCII(Configurations.Configurations_workspace, \
-        Configurations.Configurations_storesFeatureClass,textFile)
+    #Define text file export fields exportFields
+    exportFieldsAlias = [Configurations.Configurations_OBJECTIDFieldAlias,Configurations.Configurations_storeIDFieldAlias, \
+        Configurations.Configurations_fieldAlias, Configurations.Configurations_BullRingClassFieldAlias, \
+            Configurations.Configurations_IPEDSFieldAlias]
+
+    #Define export field field aliases. This are the column headers on the output text file
+    exportFields = ["OBJECTID",Configurations.Configurations_storeIDField, \
+        Configurations.Configurations_fieldname,  \
+            Configurations.Configurations_bullRingClass,Configurations.Configurations_IPEDSFieldName]
+
+    Utility_Functions.exportToTextfile(Configurations.Configurations_workspace, \
+        Configurations.Configurations_storesFeatureClass, \
+            exportFields, exportFieldsAlias,textFile)
 
     print "\nCollegiate Definition run successfully"
 

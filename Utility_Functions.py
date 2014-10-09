@@ -12,6 +12,7 @@ import os, sys
 import arcpy
 import traceback
 from arcpy import env
+import Configurations
 
 ##------------------Beginning of Functions--------------------------------------------
 
@@ -255,6 +256,96 @@ def exportToASCII(workspace,input_features, export_ASCII):
             print "\n" +msgs
 
     return ""
+def domainDictionary(workspace,domainName):
+    domains = arcpy.da.ListDomains(workspace)
+
+    #create an empty dictionary
+    domainDict = {}
+
+    for domain in domains:
+        #print('Domain name: {0}'.format(domain.name))
+        if domain.name == domainName:
+            coded_values = domain.codedValues
+            for val, desc in coded_values.iteritems():
+                print('{0} : {1}'.format(val, desc))
+                domainDict[val] = desc
+            break
+
+    return domainDict
+##Export to text  file via search cursor
+# workspace: data source for the stores feature class
+# input features: the feature class containing data to be exported
+# fields: fields that will be included in the export
+# text file parameter : the path to the output file
+def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfile):
+
+    ##Set the overwriteOutput environment setting to True
+    env.overwriteOutput = True
+
+    #Transfer Field Domain Descriptions
+    env.transferDomains = True
+
+    # Local variables...
+    #workspace = r"E:\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Sample_Data\collegiate_sample_data.gdb"
+
+    # Set the current workspace (to avoid having to specify the full path to the feature classes each time)
+    arcpy.env.workspace = workspace
+
+    #input_features = "geocode_result"
+
+    #Store domain in a dictionary and acess stuff on it.
+    domainDict = domainDictionary(workspace,Configurations.Configurations_domainName)
+
+    # Establish Class fields
+    #fields = yes.
+
+    #Define output
+    #textfile = os.path.dirname(workspace) + "/collegiate_store11.txt"
+
+    #Open the report text file in write mode
+    file = open (textfile, "w")
+
+    #Add Header lines to report text file
+    #file.write("Collegiate Store Table:\n")
+
+    #Loop thru the fields aliases object for column headers
+    ##    for field in exportFieldsAlias:
+    ##        file.write(field + " ")
+
+    #file.write("\n") #Force new line after writing the column headers
+
+    #Custom header as per requirements from SAP
+    #Store_is	Update type	Flag Name	Value
+    file.write("Store ID"+ " " +  \
+        "Update Type"+ " " \
+        "Flag Name"+ " " \
+        "Value"+ " " \
+        + "\n")
+
+    #file.write("OBJECT ID" + " " + "Store ID"+ " " + "Collegiate" + " " + "Bullring Class" + " "+ "IPEDS ID"+ "\n")
+
+    # Create cursor to search gas mains by material
+    with arcpy.da.SearchCursor(input_features, fields) as cursor:
+        for row in cursor:
+            #Get field values
+            objectid = str(row[0])
+            storeID = str(row[1])
+            collegiate = str(row[2])
+            bullringClass = str(row[3])
+            ipedsID = str(row[4])
+
+            #Write outputs to file now
+            #file.write(objectid + " " + storeID + " " + collegiate + " " + bullringClass + " " + ipedsID + "\n")
+            collegiateDescription = str(domainDict[int(collegiate)]) # Substitute code for description
+            #Write to file as below
+            # Store_is "Update type" "Flag Name" "Value"
+            file.write(storeID + " " + "U" + " " + "FLG_AREA" + " " + collegiateDescription + "\n") #with bullring
+            file.write(storeID + " " + "U" + " " + "YUS_FLG_COLLEGE" + " " + ipedsID + "\n") #with IPED
+    #Close file to release handle
+    file.close()
+
+    #Return Nothing
+    return ""
 
 def main():
     pass
@@ -275,6 +366,9 @@ if __name__ == '__main__':
 
     deleteBRMDLFieldsInStores(BRMDL,storesFeatureClass)
 
-    #function that exports to ASCII
+    #Function that exports to ASCII
     exportToASCII(workspace,input_features, export_ASCII)
+
+    #Exports to file but using search cursor
+    exportToTextfile(workspace,input_features, fields, exportFieldsAlias, textfile)
 
