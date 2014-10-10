@@ -21,8 +21,8 @@ from BullsRing import updateIPEDSID as updateIPEDSIDForBullsEye
 
 #Configurations.Configurations_bullsEye;
 
-## Interset geocodes with campus boundary
-## geys bulls eye geocodes
+## Interest geocodes with campus boundary
+## gets bulls eye geocodes
 ## Update collegiate definition field to 0
 ## and hit out
 ##
@@ -50,7 +50,7 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
                 tbinfo = traceback.format_tb(tb)[0]
                 pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                         str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-                msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+                msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
                 ##Add custom informative message to the Python script tool
                 arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -91,7 +91,7 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
             pymsg = "PYTHON ERRORS:\n intersect Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -107,7 +107,7 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
 def updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields, domainsCodedValue):
 
     try:
-        # Start an edit session. Must provide the worksapce.
+        # Start an edit session. Must provide the workspace.
         edit = arcpy.da.Editor(workspace)
 
         # Edit session is started without an undo/redo stack for versioned data
@@ -120,7 +120,7 @@ def updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields, doma
 
         #Update cursor goes here
         with arcpy.da.UpdateCursor(storesFeatureLayer, fields) as cursor:
-            for row in cursor:# loops per record in the recordset and returns an aray of objects
+            for row in cursor:# loops per record in the recordset and returns an array of objects
                 ##Set bull ring value it is set to default
                 ## This should be a data dictionary read from file
                 row[0] = int(domainsCodedValue)
@@ -141,7 +141,7 @@ def updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields, doma
             pymsg = "PYTHON ERRORS:\n updateCollegiateFieldWithBullsEye Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).

@@ -52,8 +52,8 @@ def joinStoresAndBRMDL(workspace,storesFeatureClass, joinField1, joinTable, join
         # Disable qualified field names which is the default for add join tool
         env.qualifiedFieldNames = False
 
-        # Join two feature classes by the zonecode field and only carry
-        # over the land use and land cover fields
+        # Join two feature classes by the Channel field and only carry
+        # over the ll3 segment, bullring class and distance fields
         arcpy.JoinField_management (storesFeatureClass, joinField1, joinTable, joinField2)
 
     except:
@@ -64,7 +64,7 @@ def joinStoresAndBRMDL(workspace,storesFeatureClass, joinField1, joinTable, join
             pymsg = "PYTHON ERRORS:\n joinStoresAndBRMDL Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -90,7 +90,7 @@ def createUniqueBRMD(table,field):
             pymsg = "PYTHON ERRORS:\n createUniqueBRMD Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -119,7 +119,7 @@ def createCampusBuffer(campusBoundaryFeatureClass, campusBoundaryBuffer, bufferD
             pymsg = "PYTHON ERRORS:\n createCampusBuffer Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -157,7 +157,7 @@ def intersectBullsRing(workspace,storesFeatureLayer,collegiateField, campusBound
             pymsg = "PYTHON ERRORS:\n intersectBullsRing Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -171,7 +171,7 @@ def intersectBullsRing(workspace,storesFeatureLayer,collegiateField, campusBound
 
 def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, updateValue):
     try:
-        # Start an edit session. Must provide the worksapce.
+        # Start an edit session. Must provide the workspace.
         edit = arcpy.da.Editor(workspace)
 
         # Edit session is started without an undo/redo stack for versioned data
@@ -184,7 +184,7 @@ def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, upd
 
         #Update cursor goes here
         with arcpy.da.UpdateCursor(storesFeatureLayer, fields) as cursor:
-            for row in cursor:# loops per record in the recordset and returns an aray of objects
+            for row in cursor:# loops per record in the recordset and returns an array of objects
 
                 ##Set bull ring value it is set to default
                 ## This should be a data dictionary read from file
@@ -208,7 +208,7 @@ def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, upd
             pymsg = "PYTHON ERRORS:\n updateCollegiateFieldWithBullsRing Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -236,7 +236,7 @@ def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, cam
         #Fields object
         fields =[IPEDSID,"SHAPE@XY"]
 
-        # Start an edit session. Must provide the worksapce.
+        # Start an edit session. Must provide the workspace.
         edit = arcpy.da.Editor(workspace)
 
         # Edit session is started without an undo/redo stack for versioned data
@@ -249,12 +249,12 @@ def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, cam
 
         #Update cursor goes here
         with arcpy.da.UpdateCursor(storesFeatureLayer, fields) as cursor:
-            for row in cursor:# loops per record in the recordset and returns an aray of objects
-                #Create Geomtery object from first currect row
+            for row in cursor:# loops per record in the recordset and returns an array of objects
+                #Create Geometry object from first current row
 
                 x, y = row[1] #Get x and y coordinates
                 point = arcpy.Point(x, y ) #create point object
-                pointGeom =arcpy.PointGeometry(point,sREF) #point geometry object but with spatial referencce of stores featurelayer
+                pointGeom =arcpy.PointGeometry(point,sREF) #point geometry object but with spatial reference of stores feature layer
                 #intersect geometry object and current campus buffer to get IPED ID for the store that falls within it
 
                 arcpy.SelectLayerByLocation_management(campusBoundaryLayer, 'intersect', pointGeom, "","NEW_SELECTION")
@@ -297,7 +297,7 @@ def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, cam
             pymsg = "PYTHON ERRORS:\n updateIPEDSID() Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -318,8 +318,8 @@ def executeBullsRings():
         #variable pointer to the in-memory feature layer
         storesFeatureLayer = Configurations.Configurations_storesFeatureClass + '_lyr'
 
-        ##Check that existing feature class doesnt have fields of Bull Ring Master Data List
-        ##  If it has then delete them ssince they shall be appended in the next step by joinField method
+        ##Check that existing feature class doesn't have fields of Bull Ring Master Data List
+        ##  If it has then delete them since they shall be appended in the next step by joinField method
 
         #Join Field of Bulls Ring Master Data List to the potential bulls ring feature layer/class
         joinStoresAndBRMDL(Configurations.Configurations_workspace,Configurations.Configurations_storesFeatureClass, \
@@ -327,14 +327,14 @@ def executeBullsRings():
              Configurations.Configurations_BRMDLJoinField)
 
         # create a data dictionary from bull ring class and distance from
-        #  Bull Ring Master Datalist (BRMDL)
+        #  Bull Ring Master Data list (BRMDL)
         list = createUniqueBRMD(Configurations.Configurations_BRMDL,Configurations.Configurations_bullRingClass)
 
         #For each unique distance
         for item in list:
             #Handle exception just in case an item brings issues
             try:
-                #check if item is a number in some caases its not a number and might cause some unexpected results in the query
+                #check if item is a number in some cases its not a number and might cause some unexpected results in the query
                 if numpy.isnan(item) == False:
 
                     ##Select non-bull ring features from feature layer
@@ -427,7 +427,7 @@ def executeBullsRings():
                 tbinfo = traceback.format_tb(tb)[0]
                 pymsg = "PYTHON ERRORS:\nTraceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                         str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n"
-                msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+                msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
                 ##Add custom informative message to the Python script tool
                 arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -462,7 +462,7 @@ def executeBullsRings():
         featCount = arcpy.GetCount_management(storesFeatureLayer)
         print "Number of features that are Non-Collegiate: {0}".format(featCount)
 
-        #set update value to 2 or figure defined in config.ini for non-collegiate records
+        #set update value to 2 or figure defined in Config.ini for non-collegiate records
         codedValue = str(Configurations.Configurations_nonCollegiate)
 
         #Call function to update collegiate field to value 2
@@ -482,7 +482,7 @@ def executeBullsRings():
             pymsg = "PYTHON ERRORS:\n executeBullsRings Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).

@@ -30,7 +30,7 @@ def addField(featureclass, fieldname, fieldAlias,fieldType):
             pymsg = "PYTHON ERRORS:\n addField Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -58,7 +58,7 @@ def addDomain(workspace, domainName,domainDescription,fieldType, domainType):
             pymsg = "PYTHON ERRORS:\n addDomain Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -71,7 +71,7 @@ def addDomain(workspace, domainName,domainDescription,fieldType, domainType):
 
     return ""
 
-## Add Values to colegiate Domain
+## Add Values to collegiate Domain
 def addValuesToDomain(workspace, domainName, domainDictionary):
 
     try:
@@ -88,7 +88,7 @@ def addValuesToDomain(workspace, domainName, domainDictionary):
             pymsg = "PYTHON ERRORS:\n addValuesToDomain Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -114,7 +114,7 @@ def assignDomainToField(storesFeatureClass,fieldname, domainName ):
             pymsg = "PYTHON ERRORS:\n assignDomainToField Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -128,7 +128,7 @@ def assignDomainToField(storesFeatureClass,fieldname, domainName ):
     return ""
 
 ##Backup function
-def backupInitialStoresFC (BR_workspace,BR_storesFeatureClass):
+def backupInitialStoresFC (workspace, workspaceScratch, storesFeatureClass):
 
     try:
         ## Set overwrite in workspace to true
@@ -136,16 +136,25 @@ def backupInitialStoresFC (BR_workspace,BR_storesFeatureClass):
 
         #variable pointer to the in-memory feature layer
         #this is local variable
-        backupInitialStoresFeatureLayer = BR_storesFeatureClass + '_lyr'
+        backupInitialStoresFeatureLayer = storesFeatureClass + '_lyr'
 
         #Backup Feature class of he initial stores layer
-        backupStoresFeatureClass = BR_storesFeatureClass + "_bak"
+        backupStoresFeatureClass = storesFeatureClass + "_bak"
+
+        #Use stores feature class in the scratch workspace
+        storesFeatureClassOld = workspaceScratch +"/"+ storesFeatureClass
+
+        #Use stores feature class in the collegiate workspace
+        storesFeatureClassNew = workspace +"/"+ storesFeatureClass
 
         # Make a layer from stores feature class
-        arcpy.MakeFeatureLayer_management(BR_storesFeatureClass, backupInitialStoresFeatureLayer)
+        arcpy.MakeFeatureLayer_management(storesFeatureClassOld, backupInitialStoresFeatureLayer)
 
-        #Create feature class from selection
-        arcpy.CopyFeatures_management(backupInitialStoresFeatureLayer,backupStoresFeatureClass)
+        #Create feature class from selection to create a copy of "storesFeatureClassOld" in current workspace
+        arcpy.CopyFeatures_management(backupInitialStoresFeatureLayer,storesFeatureClassNew)
+
+        #Create feature class from selection to create a back-up
+        arcpy.CopyFeatures_management(backupInitialStoresFeatureLayer,workspace +"/"+ backupStoresFeatureClass)
 
         #delete the in memory feature layer just in case we need to recreate
         # feature layer or maybe run script an additional time
@@ -158,7 +167,7 @@ def backupInitialStoresFC (BR_workspace,BR_storesFeatureClass):
             pymsg = "PYTHON ERRORS:\n backupInitialStoresFC Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -200,7 +209,7 @@ def deleteBRMDLFieldsInStores(BRMDL,storesFeatureClass):
         pymsg = "PYTHON ERRORS:\n deleteBRMDLFieldsInStores Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                 str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                 "Line {0}".format(tb.tb_lineno)
-        msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+        msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
         ##Add custom informative message to the Python script tool
         arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -244,7 +253,7 @@ def exportToASCII(workspace,input_features, export_ASCII):
             pymsg = "PYTHON ERRORS:\n exportToASCII Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
                     str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
                     "Line {0}".format(tb.tb_lineno)
-            msgs = "Geoprocesssing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
             ##Add custom informative message to the Python script tool
             arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
@@ -293,7 +302,7 @@ def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfil
 
     #input_features = "geocode_result"
 
-    #Store domain in a dictionary and acess stuff on it.
+    #Store domain in a dictionary and access stuff on it.
     domainDict = domainDictionary(workspace,Configurations.Configurations_domainName)
 
     # Establish Class fields
@@ -308,7 +317,7 @@ def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfil
     #Add Header lines to report text file
     #file.write("Collegiate Store Table:\n")
 
-    #Loop thru the fields aliases object for column headers
+    #Loop through the fields aliases object for column headers
     ##    for field in exportFieldsAlias:
     ##        file.write(field + " ")
 
@@ -316,10 +325,10 @@ def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfil
 
     #Custom header as per requirements from SAP
     #Store_is	Update type	Flag Name	Value
-    file.write("Store ID"+ " " +  \
-        "Update Type"+ " " \
-        "Flag Name"+ " " \
-        "Value"+ " " \
+    file.write("Store ID"+ "\t" +  \
+        "Update Type"+ "\t" \
+        "Flag Name"+ "\t" \
+        "Value"+ "\t" \
         + "\n")
 
     #file.write("OBJECT ID" + " " + "Store ID"+ " " + "Collegiate" + " " + "Bullring Class" + " "+ "IPEDS ID"+ "\n")
@@ -339,8 +348,8 @@ def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfil
             collegiateDescription = str(domainDict[int(collegiate)]) # Substitute code for description
             #Write to file as below
             # Store_is "Update type" "Flag Name" "Value"
-            file.write(storeID + " " + "U" + " " + "FLG_AREA" + " " + collegiateDescription + "\n") #with bullring
-            file.write(storeID + " " + "U" + " " + "YUS_FLG_COLLEGE" + " " + ipedsID + "\n") #with IPED
+            file.write(storeID + "\t" + "U" + "\t" + "FLG_AREA" + "\t" + collegiateDescription + "\n") #with bullring
+            file.write(storeID + "\t" + "U" + "\t" + "YUS_FLG_COLLEGE" + "\t" + ipedsID + "\n") #with IPED
     #Close file to release handle
     file.close()
 
@@ -362,7 +371,7 @@ if __name__ == '__main__':
 
     assignDomainToField(storesFeatureClass,fieldname, domainName )
 
-    backupInitialStoresFC (BR_workspace,BR_storesFeatureClass)
+    backupInitialStoresFC (workspace, workspaceScratch, storesFeatureClass)
 
     deleteBRMDLFieldsInStores(BRMDL,storesFeatureClass)
 

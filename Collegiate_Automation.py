@@ -33,7 +33,7 @@ try:
     ##Acquire it as a parameter either from terminal, console or via application
     configFileLocation=arcpy.GetParameterAsText(0)#Get from console or GUI being user input
     if configFileLocation =='': #Checks if supplied parameter is null
-        #Defaults to below hardcoded path if the parameter is not supplied. NB. May throw exceptions if it defaults to path below
+        #Defaults to below hard coded path if the parameter is not supplied. NB. May throw exceptions if it defaults to path below
         # since path below might not  be existing in your system with the said file name required
         configFileLocation=r"E:\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Python_Scripts\GitHub\Collegiate_Automation\Config.ini"
 
@@ -42,7 +42,14 @@ try:
     Configurations.setParameters(configFileLocation)
 
     #Name of the buffer feature class
-    BullsRing.BR_campusBoundaryBuffer = Configurations.Configurations_campusBoundaryFeatureClass + "_buffer"
+    baseName =os.path.basename(Configurations.Configurations_campusBoundaryFeatureClass)
+
+    baseNameList=  baseName.split(".") #Split by period
+    baseName = baseNameList[int(len(baseNameList) -1)]#get last name
+    #campusBoundaryFeatureClassNew = Configurations.Configurations_workspace +"/"+ baseName # Name of new intermediate featureclass to be created for campus boundary buffers
+    campusBoundaryFeatureClassNew =  baseName # Name of new intermediate featureclass to be created for campus boundary buffers
+
+    BullsRing.BR_campusBoundaryBuffer = campusBoundaryFeatureClassNew + "_buffer" #variable pointing to the campus buffer
 
     #Store all the domain values in a dictionary with the domain code as the "key" and the
     #domain description as the "value" (domainDictionary[code])
@@ -57,9 +64,9 @@ try:
     #Supports enterprise, file geodatabases
     env.workspace = Configurations.Configurations_workspace
 
-    #Backup geocodes feature layer
+    #Backup geocodes feature layer and copy geocodes from scratch geodatabase to collegiate_scratch geodatabase
     Utility_Functions.backupInitialStoresFC (Configurations.Configurations_workspace, \
-        Configurations.Configurations_storesFeatureClass)
+        Configurations.Configurations_workspaceScratch,Configurations.Configurations_storesFeatureClass)
 
     #Call function to delete BRMDL fields in stores feature class
     Utility_Functions.deleteBRMDLFieldsInStores(Configurations.Configurations_BRMDL, \
