@@ -14,7 +14,12 @@ Error handling
 
 Output format. Saving as *.txt file as per required fields
 
-DISCONNECT USERS AFTER SENDING E-mail ***
+Check the backup function***
+	Should check first if "geocodes_results exists". If it exists then backs it up 
+	Should check first if "geocodes_results exists". If it exists then backs it up with timestamp else continue
 
 Error logging ***
+
+
+
 *** (Means item is pending)

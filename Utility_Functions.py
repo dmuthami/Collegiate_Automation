@@ -134,11 +134,30 @@ def backupInitialStoresFC (workspace, workspaceScratch, storesFeatureClass):
         ## Set overwrite in workspace to true
         arcpy.env.overwriteOutput = True
 
+        ## check if stores geocode feature class exists
+
+        #Check if geocode exists
+
+        featureClassList = arcpy.ListFeatureClasses()
+
+        existingStoresFeatureClass = ""
+
+        #Check if their is an existing geocodes fetre class in the collegiate scratch geodatabase
+        # If it exists then that is the right one to back up else back up the one in the scratch geodatabase
+        for name in featureClassList:
+            desc = arcpy.Describe(name)
+            if desc.name == storesFeatureClass:
+                existingStoresFeatureClass = desc.name
+                break
+
+        ### Below code gets geocodes/stores from scratch geodatabase
+        ### And Copies it into collegiate_scatch geodatabase
+        ### -------------
         #variable pointer to the in-memory feature layer
         #this is local variable
         backupInitialStoresFeatureLayer = storesFeatureClass + '_lyr'
 
-        #Backup Feature class of he initial stores layer
+        #Backup Feature class of the initial stores layer
         backupStoresFeatureClass = storesFeatureClass + "_bak"
 
         #Use stores feature class in the scratch workspace
@@ -147,18 +166,43 @@ def backupInitialStoresFC (workspace, workspaceScratch, storesFeatureClass):
         #Use stores feature class in the collegiate workspace
         storesFeatureClassNew = workspace +"/"+ storesFeatureClass
 
-        # Make a layer from stores feature class
+        # Make a layer from stores feature class from the scratch workspace
         arcpy.MakeFeatureLayer_management(storesFeatureClassOld, backupInitialStoresFeatureLayer)
 
-        #Create feature class from selection to create a copy of "storesFeatureClassOld" in current workspace
-        arcpy.CopyFeatures_management(backupInitialStoresFeatureLayer,storesFeatureClassNew)
+        ##Below code checks if an exisitng feature class of geocodes/stores nature exists
+        ## If it exists then it copies it
+        ## If it doesnt then it backs-up from scratch geodatabase
 
-        #Create feature class from selection to create a back-up
-        arcpy.CopyFeatures_management(backupInitialStoresFeatureLayer,workspace +"/"+ backupStoresFeatureClass)
+        if existingStoresFeatureClass == "" :
+            #variable pointer to the in-memory feature layer for exisiting feature class
+            existingStoresFeatureLayer = os.path.basename(storesFeatureClassOld) + "_lyr0"
+
+            # Make a layer from stores feature class from the scratch workspace
+            arcpy.MakeFeatureLayer_management(storesFeatureClassOld, existingStoresFeatureLayer)
+
+            #Create feature class from selection to create a back-up
+            arcpy.CopyFeatures_management(existingStoresFeatureLayer, backupStoresFeatureClass)
+        else:
+            #variable pointer to the in-memory feature layer for exisiting feature class
+            existingStoresFeatureLayer = existingStoresFeatureClass + "_lyr1"
+
+            #Only create "existingStoresFeatureLayer" at this point in time
+            # Make a layer from stores feature class from the scratch workspace
+            arcpy.MakeFeatureLayer_management(existingStoresFeatureClass, existingStoresFeatureLayer)
+
+            #Create feature class from selection to create a back-up
+            arcpy.CopyFeatures_management(existingStoresFeatureLayer, backupStoresFeatureClass)
+
+        #Create feature class from selection to create a copy of "storesFeatureClassOld" in current workspace
+        # This action overwrites if their is any existing.
+        # However, this should not be cause for alarm since we have already backup current
+        arcpy.CopyFeatures_management(backupInitialStoresFeatureLayer,storesFeatureClassNew)
 
         #delete the in memory feature layer just in case we need to recreate
         # feature layer or maybe run script an additional time
         arcpy.Delete_management(backupInitialStoresFeatureLayer)
+        arcpy.Delete_management(existingStoresFeatureLayer)
+
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
             ##
