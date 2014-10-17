@@ -14,12 +14,10 @@ Error handling
 
 Output format. Saving as *.txt file as per required fields
 
-Check the backup function***
+Check the backup function
 	Should check first if "geocodes_results exists". If it exists then backs it up 
 	Should check first if "geocodes_results exists". If it exists then backs it up with timestamp else continue
 
 Error logging ***
-
-
 
 *** (Means item is pending)

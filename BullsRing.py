@@ -221,20 +221,40 @@ def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, upd
 
     return ""
 
-def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS):
+def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,IPEDSID):
     try:
-        #variable pointer to the in-memory feature layer
-        campusBoundaryLayer = campusBoundaryBuffer + '_lyr'
+        # execute the function
+        arcpy.Near_analysis(storesFeatureClass, campusBoundary)
 
-        # Make a layer from stores feature class
-        arcpy.MakeFeatureLayer_management(campusBoundaryBuffer, campusBoundaryLayer)
+        #Create feature layer
+        storesFeatureLayer = storesFeatureClass + "_Lyr"
 
-        #Get spatial reference of the stores feature class
-        desc = arcpy.Describe(storesFeatureLayer)
-        sREF = desc.spatialReference
+        # Create a feature layer from the vegtype featureclass
+        arcpy.MakeFeatureLayer_management (storesFeatureClass,  storesFeatureLayer)
 
-        #Fields object
-        fields =[IPEDSID,"SHAPE@XY"]
+        # Join the feature layer to a table
+        arcpy.JoinField_management(storesFeatureLayer, "NEAR_FID", campusBoundary, "OBJECTID",[IPEDSID])
+
+        ##Select non-bull ring features from feature layer
+        #collegiate definition
+        collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
+            Configurations.Configurations_fieldname)
+
+        # Select  Bulls eye records
+        collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " Or " + \
+            collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
+
+        # Select desired features from veg_layer
+        arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "NEW_SELECTION", collegiateSQLExp)
+
+        #Switch selection to select only non Bulls eye and non Bullring records (Non Collegiate)
+        arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SWITCH_SELECTION")
+
+        ## Below code
+        ## Make (Non Collegiate) IPEDS null
+        ##
+
+        fields = [IPEDSID]
 
         # Start an edit session. Must provide the workspace.
         edit = arcpy.da.Editor(workspace)
@@ -250,30 +270,10 @@ def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, cam
         #Update cursor goes here
         with arcpy.da.UpdateCursor(storesFeatureLayer, fields) as cursor:
             for row in cursor:# loops per record in the recordset and returns an array of objects
-                #Create Geometry object from first current row
 
-                x, y = row[1] #Get x and y coordinates
-                point = arcpy.Point(x, y ) #create point object
-                pointGeom =arcpy.PointGeometry(point,sREF) #point geometry object but with spatial reference of stores feature layer
-                #intersect geometry object and current campus buffer to get IPED ID for the store that falls within it
-
-                arcpy.SelectLayerByLocation_management(campusBoundaryLayer, 'intersect', pointGeom, "","NEW_SELECTION")
-
-                # Determine the number of selected features in the stores feature layer
-                # Syntax: arcpy.GetCount_management (in_rows)
-                featCount = arcpy.GetCount_management(campusBoundaryLayer)
-                print "\nNumber of Campus Boundary features: {0}".format(featCount)
-
-                ipedsID = ""# Campus boundary IPEDS
-
-                #Get only top selected row.Might return more than one campus IPED ID
-                #get IPED ID
-                for roww in arcpy.da.SearchCursor(campusBoundaryLayer, [campusBoundaryIPEDS]):
-                    ipedsID = roww[0]
-                    break #forcefully leave cursor after only first read
-
-                #Update stores feature layer by placing IPED
-                row[0] = int(ipedsID) # need to be as per the coded values of the domain called collegiate_definition
+                ##Set bull ring value it is set to default
+                ## This should be a data dictionary read from file
+                row[0] = "" # need to be as per the coded values of the domain called collegiate_definition
 
                 # Update the cursor with the updated row object that contains now the new record
                 cursor.updateRow(row)
@@ -287,7 +287,7 @@ def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, cam
 
         #delete the in memory feature layer just in case we need to recreate
         # feature layer or maybe run script an additional time
-        arcpy.Delete_management(campusBoundaryLayer)
+        arcpy.Delete_management(storesFeatureLayer)
 
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
@@ -416,8 +416,8 @@ def executeBullsRings():
                                 BR_campusBoundaryBuffer, bullRingClass)
 
                         #Call function to append IPEDs here
-                        updateIPEDSID(Configurations.Configurations_workspace,storesFeatureLayer,Configurations.Configurations_IPEDSFieldName, \
-                            BR_campusBoundaryBuffer, Configurations.Configurations_CampusBoundaryIPEDSID)
+##                        updateIPEDSID(Configurations.Configurations_workspace,storesFeatureLayer,Configurations.Configurations_IPEDSFieldName, \
+##                            BR_campusBoundaryBuffer, Configurations.Configurations_CampusBoundaryIPEDSID)
                     ##Loop until the end and
                     print ""
             except:
@@ -506,4 +506,4 @@ if __name__ == '__main__':
     executeBullsRings()
 
     #Updates IPEDSID
-    updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS)
+    updateIPEDSID(workspace,storesFeatureClass,campusBoundary,IPEDSID)

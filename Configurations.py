@@ -16,6 +16,7 @@ import traceback
 #Workspace global variables
 Configurations_workspace = ""
 Configurations_workspaceScratch = ""
+Configurations_campusBoundaryFeatureClass = ""
 Configurations_storesFeatureClass = ""
 Configurations_storesFeatureClassNew = ""
 Configurations_BRMDL = ""

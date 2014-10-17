@@ -16,6 +16,7 @@ import os, sys
 import arcpy
 import traceback
 from arcpy import env
+from datetime import datetime
 
 ##Custom module containing functions
 import Configurations
@@ -76,11 +77,6 @@ try:
     Utility_Functions.addField(Configurations.Configurations_storesFeatureClass, \
         Configurations.Configurations_fieldname,Configurations.Configurations_fieldAlias,Configurations.Configurations_fieldType)
 
-    #Call function to add IPEDS ID Field
-    Utility_Functions.addField(Configurations.Configurations_storesFeatureClass, \
-        Configurations.Configurations_IPEDSFieldName,Configurations.Configurations_IPEDSFieldAlias, \
-            Configurations.Configurations_IPEDSFieldType)
-
     #Call function to Create Domain, store domain values in a dictionary, and add domain to the
     # feature class and to the collegiate  field
     #Call add domain function
@@ -111,9 +107,19 @@ try:
     BullsRing.executeBullsRings();
     print "Am done with Bull Ring\n"
 
+    ##Apends IPEDSID into the stores/geocodes feature class
+    #update IPEDSID
+    BullsRing.updateIPEDSID(Configurations.Configurations_workspace, \
+        Configurations.Configurations_storesFeatureClass, \
+            Configurations.Configurations_campusBoundaryFeatureClass, \
+                Configurations.Configurations_CampusBoundaryIPEDSID)
+
+    ##Prepare for output in tab delimited text file
+
     #Export to text file#
+    currentDate = datetime.now().strftime("-%y-%m-%d_%H-%M-%S") # Current time
     textFile = Configurations.Configurations_outputFolder + "/" +  \
-     Configurations.Configurations_outputTextFile + ".txt"
+     Configurations.Configurations_outputTextFile + str(currentDate)+".txt"
 
     #Define text file export fields exportFields
     exportFieldsAlias = [Configurations.Configurations_OBJECTIDFieldAlias,Configurations.Configurations_storeIDFieldAlias, \

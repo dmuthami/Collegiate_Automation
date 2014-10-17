@@ -77,8 +77,8 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
         updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields,domainsCodedValue)
 
         #Call function to update the IPEDS ID
-        updateIPEDSID(workspace,storesFeatureLayer,Configurations.Configurations_IPEDSFieldName,campusBoundaryFeatureClass, \
-         Configurations.Configurations_CampusBoundaryIPEDSID)
+##        updateIPEDSID(workspace,storesFeatureLayer,Configurations.Configurations_IPEDSFieldName,campusBoundaryFeatureClass, \
+##         Configurations.Configurations_CampusBoundaryIPEDSID)
 
         #delete the in memory feature layer just in case we need to recreate
         # feature layer or maybe run script an additional time
