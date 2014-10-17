@@ -221,7 +221,7 @@ def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, upd
 
     return ""
 
-def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,IPEDSID):
+def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,fields):
     try:
         # execute the function
         arcpy.Near_analysis(storesFeatureClass, campusBoundary)
@@ -233,7 +233,7 @@ def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,IPEDSID):
         arcpy.MakeFeatureLayer_management (storesFeatureClass,  storesFeatureLayer)
 
         # Join the feature layer to a table
-        arcpy.JoinField_management(storesFeatureLayer, "NEAR_FID", campusBoundary, "OBJECTID",[IPEDSID])
+        arcpy.JoinField_management(storesFeatureLayer, "NEAR_FID", campusBoundary, "OBJECTID",fields[0])
 
         ##Select non-bull ring features from feature layer
         #collegiate definition
@@ -248,13 +248,11 @@ def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,IPEDSID):
         arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "NEW_SELECTION", collegiateSQLExp)
 
         #Switch selection to select only non Bulls eye and non Bullring records (Non Collegiate)
-        arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SWITCH_SELECTION")
+        #arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SWITCH_SELECTION")
 
         ## Below code
         ## Make (Non Collegiate) IPEDS null
         ##
-
-        fields = [IPEDSID]
 
         # Start an edit session. Must provide the workspace.
         edit = arcpy.da.Editor(workspace)
@@ -273,7 +271,7 @@ def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,IPEDSID):
 
                 ##Set bull ring value it is set to default
                 ## This should be a data dictionary read from file
-                row[0] = "" # need to be as per the coded values of the domain called collegiate_definition
+                row[1] = row[0] # need to be as per the coded values of the domain called collegiate_definition
 
                 # Update the cursor with the updated row object that contains now the new record
                 cursor.updateRow(row)
@@ -506,4 +504,4 @@ if __name__ == '__main__':
     executeBullsRings()
 
     #Updates IPEDSID
-    updateIPEDSID(workspace,storesFeatureClass,campusBoundary,IPEDSID)
+    updateIPEDSID(workspace,storesFeatureClass,campusBoundary,fields)
