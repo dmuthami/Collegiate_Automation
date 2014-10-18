@@ -24,11 +24,10 @@ import Utility_Functions
 import BullsEye
 import BullsRing
 
-##Set the overwriteOutput environment setting to True
-##Comment out line in script to overwrite data
-#env.overwriteOutput = True
-
 try:
+    print "\n------------------------------------------------------------------\n"+\
+        "Start Time : "+datetime.now().strftime("-%y-%m-%d_%H-%M-%S") +\
+          "\n------------------------------------------------------------------\n"
     ##Obtain script parameter values
     ##location for configuration file
     ##Acquire it as a parameter either from terminal, console or via application
@@ -142,6 +141,9 @@ try:
 
     print "\nCollegiate Definition run successfully"
 
+    print "\n------------------------------------------------------------------\n"+\
+        "End Time : "+datetime.now().strftime("-%y-%m-%d_%H-%M-%S") +\
+          "\n------------------------------------------------------------------\n"
 except:
     ## Return any Python specific errors and any error returned by the geoprocessor
     ##

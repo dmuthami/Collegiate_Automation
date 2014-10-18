@@ -377,8 +377,17 @@ def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfil
 
     #file.write("OBJECT ID" + " " + "Store ID"+ " " + "Collegiate" + " " + "Bullring Class" + " "+ "IPEDS ID"+ "\n")
 
+    ##Select non-bull ring features from feature layer
+    #collegiate definition
+    collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
+        Configurations.Configurations_fieldname)
+
+    # Select  Bulls eye records and bulls ring records only
+    collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " Or " + \
+        collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
+
     # Create cursor to search gas mains by material
-    with arcpy.da.SearchCursor(input_features, fields) as cursor:
+    with arcpy.da.SearchCursor(input_features, fields,collegiateSQLExp) as cursor:
         for row in cursor:
             #Get field values
             objectid = str(row[0])

@@ -240,15 +240,12 @@ def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,fields):
         collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
             Configurations.Configurations_fieldname)
 
-        # Select  Bulls eye records
+        # Select  Bulls eye records and bulls ring records only
         collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " Or " + \
             collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
 
         # Select desired features from veg_layer
         arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "NEW_SELECTION", collegiateSQLExp)
-
-        #Switch selection to select only non Bulls eye and non Bullring records (Non Collegiate)
-        #arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SWITCH_SELECTION")
 
         ## Below code
         ## Make (Non Collegiate) IPEDS null
