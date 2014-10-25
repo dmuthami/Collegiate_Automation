@@ -309,6 +309,8 @@ def exportToASCII(workspace,input_features, export_ASCII):
             print "\n" +msgs
 
     return ""
+
+#Function returns a dictionary
 def domainDictionary(workspace,domainName):
     domains = arcpy.da.ListDomains(workspace)
 

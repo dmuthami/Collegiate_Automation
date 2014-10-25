@@ -20,6 +20,7 @@ Configurations_campusBoundaryFeatureClass = ""
 Configurations_storesFeatureClass = ""
 Configurations_storesFeatureClassNew = ""
 Configurations_BRMDL = ""
+Configurations_realSDETable = ""
 
 #collegiate field global variables
 Configurations_fieldname = ""
@@ -62,7 +63,18 @@ Configurations_OBJECTIDFieldAlias = ""
 Configurations_storeIDFieldAlias= ""
 Configurations_storeIDField= ""
 
+#output to SDE table parameters global variables
+Configurations_valueFieldName = ""
+Configurations_valueFieldAlias = ""
+Configurations_sdeTable = ""
+Configurations_flagAreaValue1 = ""
+Configurations_updateTypeValue = ""
+Configurations_flagAreaValue2 = ""
+Configurations_flagNameFieldName = ""
+Configurations_updateTypeFieldName = ""
+
 def setParameters(configFileLocation):
+
     #Dirty way of working with global variables
     global Configurations_Config #Set global variable.Usually not favourable in Python
     global Configurations_Sections #Set global variable.Usually not favourable in Python
@@ -93,6 +105,47 @@ def setParameters(configFileLocation):
     #Call function to set parameters for IPEDS
     setIPEDSParameters()
 
+    #Call function to set parameters for outputting to sde table
+    setOutputToSDETableParameters()
+
+    return ""
+
+##Set parameters for writinng to output sde table
+def setOutputToSDETableParameters():
+
+    #read workspace location from Config file location
+    global Configurations_valueFieldName # Needed to modify global copy of Configurations_valueFieldName
+    Configurations_valueFieldName = Configurations_Config.get('OutPutToSDE', 'valueFieldName')
+
+    #read workspace location from Config file location
+    global Configurations_valueFieldAlias # Needed to modify global copy of Configurations_valueFieldAlias
+    Configurations_valueFieldAlias = Configurations_Config.get('OutPutToSDE', 'valueFieldAlias')
+
+    #read workspace location from Config file location
+    global Configurations_sdeTable # Needed to modify global copy of Configurations_sdeTable
+    Configurations_sdeTable = Configurations_Config.get('OutPutToSDE', 'sdeTable')
+
+    #read workspace location from Config file location
+    global Configurations_flagAreaValue1 # Needed to modify global copy of Configurations_flagAreaValue1
+    Configurations_flagAreaValue1 = Configurations_Config.get('OutPutToSDE', 'flagAreaValue1')
+
+    #read workspace location from Config file location
+    global Configurations_updateTypeValue # Needed to modify global copy of Configurations_updateTypeValue
+    Configurations_updateTypeValue = Configurations_Config.get('OutPutToSDE', 'updateTypeValue')
+
+    #read workspace location from Config file location
+    global Configurations_flagAreaValue2 # Needed to modify global copy of Configurations_flagAreaValue1
+    Configurations_flagAreaValue2 = Configurations_Config.get('OutPutToSDE', 'flagAreaValue2')
+
+
+    #read workspace location from Config file location
+    global Configurations_flagNameFieldName # Needed to modify global copy of Configurations_flagNameFieldName
+    Configurations_flagNameFieldName = Configurations_Config.get('OutPutToSDE', 'flagNameFieldName')
+
+    #read workspace location from Config file location
+    global Configurations_updateTypeFieldName # Needed to modify global copy of Configurations_updateTypeFieldName
+    Configurations_updateTypeFieldName = Configurations_Config.get('OutPutToSDE', 'updateTypeFieldName')
+
     return ""
 
 def setWorkSpaceParameters():
@@ -115,6 +168,10 @@ def setWorkSpaceParameters():
     #read campus boundary feature class location from Config file location
     global Configurations_BRMDL # Needed to modify global copy of Configurations_BRMDL
     Configurations_BRMDL = Configurations_Config.get('Workspace','BRMDL')
+
+    #read campus boundary feature class location from Config file location
+    global Configurations_realSDETable # Needed to modify global copy of Configurations_realSDETable
+    Configurations_realSDETable = Configurations_Config.get('Workspace','realSDETable')
 
     return ""
 

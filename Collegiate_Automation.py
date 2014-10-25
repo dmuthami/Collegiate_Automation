@@ -23,6 +23,7 @@ import Configurations
 import Utility_Functions
 import BullsEye
 import BullsRing
+import OutputToSDETable
 
 try:
     print "\n------------------------------------------------------------------\n"+\
@@ -57,7 +58,7 @@ try:
         int(Configurations.Configurations_bullsRing) : "Bulls Ring", \
             int(Configurations.Configurations_nonCollegiate) : "Non Collegiate"}
 
-    ##  Main script block
+    ##  Main Script Block
     ##-------------------------
 
     #Set workspace variable
@@ -138,6 +139,10 @@ try:
     Utility_Functions.exportToTextfile(Configurations.Configurations_workspace, \
         Configurations.Configurations_storesFeatureClass, \
             exportFields, exportFieldsAlias,textFile)
+
+    ##Prepare for output in sde table
+    #call function to output to SDE table
+    OutputToSDETable.outputSDETable()
 
     print "\nCollegiate Definition run successfully"
 
