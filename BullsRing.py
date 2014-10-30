@@ -268,7 +268,7 @@ def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,fields):
 
                 ##Set bull ring value it is set to default
                 ## This should be a data dictionary read from file
-                row[1] = row[0] # need to be as per the coded values of the domain called collegiate_definition
+                row[1] = row[0] #IPEDS_ID from campus boundarr into  new IPEDS_ID (ipeds_id2) for export into textfile or into the sde table
 
                 # Update the cursor with the updated row object that contains now the new record
                 cursor.updateRow(row)

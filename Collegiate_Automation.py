@@ -54,8 +54,8 @@ try:
 
     #Store all the domain values in a dictionary with the domain code as the "key" and the
     #domain description as the "value" (domainDictionary[code])
-    domainDictionary = {int(Configurations.Configurations_bullsEye) : "Bulls Eye", \
-        int(Configurations.Configurations_bullsRing) : "Bulls Ring", \
+    domainDictionary = {int(Configurations.Configurations_bullsEye) : "BULLSEYE", \
+        int(Configurations.Configurations_bullsRing) : "BULLSRING", \
             int(Configurations.Configurations_nonCollegiate) : "Non Collegiate"}
 
     ##  Main Script Block
@@ -117,7 +117,7 @@ try:
     BullsRing.updateIPEDSID(Configurations.Configurations_workspace, \
         Configurations.Configurations_storesFeatureClass, \
             Configurations.Configurations_campusBoundaryFeatureClass, \
-                [Configurations.Configurations_CampusBoundaryIPEDSID,Configurations.Configurations_IPEDSFieldName])
+                [Configurations.Configurations_CampusBoundaryIPEDSID,Configurations.Configurations_IPEDSFieldName])#IPEDS_ID from campus boundary, new IPEDS_ID (ipeds_id2) created by script
 
     ##Prepare for output in tab delimited text file
 

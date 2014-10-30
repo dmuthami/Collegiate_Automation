@@ -9,7 +9,9 @@
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
 # import system modules
-import arcpy, os
+import os, sys
+import arcpy
+import traceback
 from arcpy import env
 
 

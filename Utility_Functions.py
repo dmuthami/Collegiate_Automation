@@ -371,11 +371,11 @@ def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfil
 
     #Custom header as per requirements from SAP
     #Store_is	Update type	Flag Name	Value
-    file.write("Store ID"+ "\t" +  \
-        "Update Type"+ "\t" \
-        "Flag Name"+ "\t" \
-        "Value"+ "\t" \
-        + "\n")
+##    file.write("Store ID"+ "\t" +  \
+##        "Update Type"+ "\t" \
+##        "Flag Name"+ "\t" \
+##        "Value"+ "\t" \
+##        + "\n")
 
     #file.write("OBJECT ID" + " " + "Store ID"+ " " + "Collegiate" + " " + "Bullring Class" + " "+ "IPEDS ID"+ "\n")
 
