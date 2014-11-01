@@ -30,6 +30,11 @@ def fieldMappingsForCollegiateStore1(workspace,intable,fields,sdeTable):
         collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " Or " + \
             collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
 
+        #If the variable is set to 1 then all records are required
+        #  else if set to 0 then on collegiate records are required
+        if Configurations.Configurations_nonCollegiateOutput  == str(1)  :
+            collegiateSQLExp = ""
+
         outputView1 = "output_view1"
 
         # The created crime_view layer will have fields as set in fieldinfo object
@@ -89,12 +94,22 @@ def fieldMappingsForCollegiateStore1(workspace,intable,fields,sdeTable):
 
         #Update cursor goes here
         with arcpy.da.UpdateCursor(sdeTable, fields) as cursor:
+            # Determine the number of selected features in the stores feature layer
+            # Syntax: arcpy.GetCount_management (in_rows)
+            featCount = arcpy.GetCount_management(sdeTable)
+            print "Number of features: {0}".format(featCount)
             for row in cursor:# loops per record in the recordset and returns an array of objects
                 ##Set bull ring value it is set to default
                 ## This should be a data dictionary read from file
-                row[1] = Configurations.Configurations_flagAreaValue1
-                row[2] = Configurations.Configurations_updateTypeValue
-                row[0] = str(domainDict[int(row[0])]) #substitute coded value for its description
+                #Non collegiate
+                if row[0] == Configurations.Configurations_nonCollegiate:
+                    row[1] = ""
+                    row[2] = Configurations.Configurations_updateTypeValue
+                    row[0] = ""
+                else: #collegiate records
+                    row[1] = Configurations.Configurations_flagAreaValue1
+                    row[2] = Configurations.Configurations_updateTypeValue
+                    row[0] = str(domainDict[int(row[0])]) #substitute coded value for its description
                 # Update the cursor with the updated row object that contains now the new record
                 cursor.updateRow(row)
 
@@ -139,6 +154,11 @@ def fieldMappingsForCollegiateStore2(workspace,intable,fields,sdeTable):
         # Select  Bulls eye records and bulls ring records only
         collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " Or " + \
             collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
+
+        #If the variable is set to 1 then all records are required
+        #  else if set to 0 then on collegiate records are required
+        if Configurations.Configurations_nonCollegiateOutput  == str(1)  :
+            collegiateSQLExp = ""
 
         outputView1 = "output_view1"
 
@@ -196,8 +216,16 @@ def fieldMappingsForCollegiateStore2(workspace,intable,fields,sdeTable):
             for row in cursor:# loops per record in the recordset and returns an array of objects
                 ##Set bull ring value it is set to default
                 ## This should be a data dictionary read from file
-                row[0] = Configurations.Configurations_flagAreaValue2
-                row[1] = Configurations.Configurations_updateTypeValue
+                #Non collegiate
+                if row[0] == Configurations.Configurations_nonCollegiate:
+                    row[1] = ""
+                    row[2] = Configurations.Configurations_updateTypeValue
+                    row[0] = ""
+                else: #collegiate records
+                    row[1] = Configurations.Configurations_flagAreaValue2
+                    row[2] = Configurations.Configurations_updateTypeValue
+                    row[0] = str(domainDict[int(row[0])]) #substitute coded value for its description
+                # Update the cursor with the updated row object that contains now the new record
 
                 # Update the cursor with the updated row object that contains now the new record
                 cursor.updateRow(row)
@@ -318,8 +346,8 @@ def outputSDETable():
         #Append BullsEye and BullsRing dataset
         fieldMappingsForCollegiateStore1(Configurations.Configurations_workspace,intable,fields1,sdeTable)
 
-        #Append BullsEye and BullsRing dataset
-        fieldMappingsForCollegiateStore2(Configurations.Configurations_workspace,intable,fields2,sdeTable)
+        #Append IPEDS ID Value
+        fieldMappingsForCollegiateStore2(Configurations.Configurations_workspace,intable,fields1,sdeTable)
 
         #Call function to output to append to sde table
         appendSDETable(sdeTable,Configurations.Configurations_realSDETable)

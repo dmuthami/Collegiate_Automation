@@ -388,6 +388,11 @@ def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfil
     collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " Or " + \
         collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
 
+    #If the variable is set to 1 then all records are required
+    #  else if set to 0 then on collegiate records are required
+    if Configurations.Configurations_nonCollegiateOutput  == str(1) :
+        collegiateSQLExp = ""
+
     # Create cursor to search gas mains by material
     with arcpy.da.SearchCursor(input_features, fields,collegiateSQLExp) as cursor:
         for row in cursor:
@@ -401,6 +406,12 @@ def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfil
             #Write outputs to file now
             #file.write(objectid + " " + storeID + " " + collegiate + " " + bullringClass + " " + ipedsID + "\n")
             collegiateDescription = str(domainDict[int(collegiate)]) # Substitute code for description
+
+            #If non collegiate then write empty string
+            if collegiate == Configurations.Configurations_nonCollegiate:
+                collegiateDescription = ""
+                ipedsID = ""
+
             #Write to file as below
             # Store_is "Update type" "Flag Name" "Value"
             file.write(storeID + "\t" + "U" + "\t" + "FLG_AREA" + "\t" + collegiateDescription + "\n") #with bullring

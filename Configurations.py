@@ -56,12 +56,13 @@ Configurations_IPEDSFieldAlias = ""
 Configurations_IPEDSFieldType = ""
 Configurations_CampusBoundaryIPEDSID = ""
 
-#buffer parameters global variables
+#Output parameters global variables
 Configurations_outputFolder = ""
 Configurations_outputTextFile = ""
 Configurations_OBJECTIDFieldAlias = ""
 Configurations_storeIDFieldAlias= ""
-Configurations_storeIDField= ""
+Configurations_storeIDField = ""
+Configurations_nonCollegiateOutput = ""
 
 #output to SDE table parameters global variables
 Configurations_valueFieldName = ""
@@ -232,6 +233,10 @@ def setOutputParameters():
     #read field alias name for store id field from Config file location
     global Configurations_storeIDField # Needed to modify global copy of Configurations_storeIDField
     Configurations_storeIDField = Configurations_Config.get('OutPut','storeIDField')
+
+    #read variable to output non-Collegiate records. either 1 or 0. either on/off
+    global Configurations_nonCollegiateOutput # Needed to modify global copy of Configurations_nonCollegiate
+    Configurations_nonCollegiateOutput = Configurations_Config.get('OutPut','nonCollegiateOutput')
 
     return ""
 
