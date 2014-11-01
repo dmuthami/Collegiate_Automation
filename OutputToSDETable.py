@@ -97,7 +97,7 @@ def fieldMappingsForCollegiateStore1(workspace,intable,fields,sdeTable):
             # Determine the number of selected features in the stores feature layer
             # Syntax: arcpy.GetCount_management (in_rows)
             featCount = arcpy.GetCount_management(sdeTable)
-            print "Number of features: {0}".format(featCount)
+            print "\nNumber of features: {0}".format(featCount)
             for row in cursor:# loops per record in the recordset and returns an array of objects
                 ##Set bull ring value it is set to default
                 ## This should be a data dictionary read from file
@@ -224,7 +224,6 @@ def fieldMappingsForCollegiateStore2(workspace,intable,fields,sdeTable):
                 else: #collegiate records
                     row[1] = Configurations.Configurations_flagAreaValue2
                     row[2] = Configurations.Configurations_updateTypeValue
-                    row[0] = str(domainDict[int(row[0])]) #substitute coded value for its description
                 # Update the cursor with the updated row object that contains now the new record
 
                 # Update the cursor with the updated row object that contains now the new record
