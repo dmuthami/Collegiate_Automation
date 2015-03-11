@@ -13,6 +13,7 @@
 ##  Import traceback :modules for debugging/ module provides a standard interface to extract, format and print stack traces of Python programs
 
 import os, sys
+import logging
 import arcpy
 import traceback
 from arcpy import env
@@ -25,10 +26,23 @@ import BullsEye
 import BullsRing
 import OutputToSDETable
 
+
 try:
-    print "\n------------------------------------------------------------------\n"+\
-        "Start Time : "+datetime.now().strftime("-%y-%m-%d_%H-%M-%S") +\
-          "\n------------------------------------------------------------------\n"
+    #Set-up logging
+    logger = logging.getLogger('myapp')
+    Configurations.Configurations_cat_logfile = os.path.join(os.path.dirname(__file__), 'cat_logfile.log')
+    hdlr = logging.FileHandler(Configurations.Configurations_cat_logfile)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    logger.setLevel(logging.INFO)
+
+    msg ="\n------------------------------------------------------------------\n"+"Start Time : " + datetime.now().strftime("-%y-%m-%d_%H-%M-%S")+ "\n------------------------------------------------------------------\n"
+
+    print msg
+	#Logging
+    logger.info(msg)
+
     ##Obtain script parameter values
     ##location for configuration file
     ##Acquire it as a parameter either from terminal, console or via application
@@ -36,7 +50,7 @@ try:
     if configFileLocation =='': #Checks if supplied parameter is null
         #Defaults to below hard coded path if the parameter is not supplied. NB. May throw exceptions if it defaults to path below
         # since path below might not  be existing in your system with the said file name required
-        configFileLocation=r"E:\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Python_Scripts\GitHub\Collegiate_Automation\Config.ini"
+        configFileLocation=r"C:\DAVID-MUTHAMI\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Python_Scripts\GitHub\Collegiate_Automation\Config.ini"
 
     ##Read from config file
     #If for any reason an exception is thrown here then subsequent code will not be executed
@@ -66,55 +80,59 @@ try:
     env.workspace = Configurations.Configurations_workspace
 
     #Backup geocodes feature layer and copy geocodes from scratch geodatabase to collegiate_scratch geodatabase
-    Utility_Functions.backupInitialStoresFC (Configurations.Configurations_workspace, \
+    Utility_Functions.backupInitialStoresFC (logger,Configurations.Configurations_workspace, \
         Configurations.Configurations_workspaceScratch,Configurations.Configurations_storesFeatureClass)
 
     #Call function to delete BRMDL fields in stores feature class
-    Utility_Functions.deleteBRMDLFieldsInStores(Configurations.Configurations_BRMDL, \
+    Utility_Functions.deleteBRMDLFieldsInStores(logger,Configurations.Configurations_BRMDL, \
         Configurations.Configurations_storesFeatureClass)
 
     #Call function to add collegiate field
-    Utility_Functions.addField(Configurations.Configurations_storesFeatureClass, \
+    Utility_Functions.addField(logger,Configurations.Configurations_storesFeatureClass, \
         Configurations.Configurations_fieldname,Configurations.Configurations_fieldAlias,Configurations.Configurations_fieldType)
 
     #Call function to add IPEDS ID Field
-    Utility_Functions.addField(Configurations.Configurations_storesFeatureClass, \
+    Utility_Functions.addField(logger,Configurations.Configurations_storesFeatureClass, \
         Configurations.Configurations_IPEDSFieldName,Configurations.Configurations_IPEDSFieldAlias, \
             Configurations.Configurations_IPEDSFieldType)
 
     #Call function to Create Domain, store domain values in a dictionary, and add domain to the
     # feature class and to the collegiate  field
     #Call add domain function
-    Utility_Functions.addDomain(Configurations.Configurations_workspace, \
+    Utility_Functions.addDomain(logger, Configurations.Configurations_workspace, \
         Configurations.Configurations_domainName,Configurations.Configurations_domainDescription \
         ,Configurations.Configurations_fieldType, \
             Configurations.Configurations_domainType)
 
     #Call assign domain values function
-    Utility_Functions.addValuesToDomain(Configurations.Configurations_workspace, \
+    Utility_Functions.addValuesToDomain(logger, Configurations.Configurations_workspace, \
         Configurations.Configurations_domainName, domainDictionary)
 
     #Call assign domain to field
     #Call function here
-    Utility_Functions.assignDomainToField(Configurations.Configurations_storesFeatureClass, \
+    Utility_Functions.assignDomainToField(logger, Configurations.Configurations_storesFeatureClass, \
         Configurations.Configurations_fieldname, Configurations.Configurations_domainName)
 
 
     #Call intersect to get collegiate bull eyes
     #Call function here
-    BullsEye.intersect(Configurations.Configurations_workspace, \
+    BullsEye.intersect(logger,Configurations.Configurations_workspace, \
         Configurations.Configurations_storesFeatureClass,Configurations.Configurations_fieldname, \
             Configurations.Configurations_campusBoundaryFeatureClass, Configurations.Configurations_bullsEye)
 
 
     #Run Bulls eye and non collegiate stores analysis
     #execute Bulls Ring and non collegiate records too
-    BullsRing.executeBullsRings();
-    print "Am done with Bull Ring\n"
+    BullsRing.executeBullsRings(logger);
+
+	#Logging
+    msg = 'Bull ring execution is successful'
+    logger.info(msg)
+    print msg+"\n"
 
     ##Apends IPEDSID into the stores/geocodes feature class
     #update IPEDSID
-    BullsRing.updateIPEDSID(Configurations.Configurations_workspace, \
+    BullsRing.updateIPEDSID(logger, Configurations.Configurations_workspace, \
         Configurations.Configurations_storesFeatureClass, \
             Configurations.Configurations_campusBoundaryFeatureClass, \
                 [Configurations.Configurations_CampusBoundaryIPEDSID,Configurations.Configurations_IPEDSFieldName])#IPEDS_ID from campus boundary, new IPEDS_ID (ipeds_id2) created by script
@@ -136,19 +154,23 @@ try:
         Configurations.Configurations_fieldname,  \
             Configurations.Configurations_bullRingClass,Configurations.Configurations_IPEDSFieldName]
 
-    Utility_Functions.exportToTextfile(Configurations.Configurations_workspace, \
+    Utility_Functions.exportToTextfile(logger, Configurations.Configurations_workspace, \
         Configurations.Configurations_storesFeatureClass, \
             exportFields, exportFieldsAlias,textFile)
 
     ##Prepare for output in sde table
     #call function to output to SDE table
-    OutputToSDETable.outputSDETable()
+    OutputToSDETable.outputSDETable(logger)
 
-    print "\nCollegiate Definition run successfully"
+    msg ='Collegiate Definition run successfully'
+    logger.info(msg)
+    print "\n"+ msg
 
-    print "\n------------------------------------------------------------------\n"+\
+    str= "\n------------------------------------------------------------------\n"+\
         "End Time : "+datetime.now().strftime("-%y-%m-%d_%H-%M-%S") +\
           "\n------------------------------------------------------------------\n"
+    print str
+    logger.info(str)
 except:
     ## Return any Python specific errors and any error returned by the geoprocessor
     ##
@@ -166,4 +188,7 @@ except:
     ##To be commented on python script scheduling in Windows
     print pymsg
     print "\n" +msgs
+	#Log messages
+    logger.info("Collegiate Automation Main Script  : " +pymsg)
+    logger.info("Collegiate Automation Main Script  : " +msgs)
 

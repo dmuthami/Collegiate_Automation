@@ -15,7 +15,8 @@ import arcpy
 import traceback
 from arcpy import env
 import numpy
-
+#Logging module
+import logging
 ##Custom module containing functions
 import Configurations
 
@@ -47,7 +48,7 @@ BR_endType = ""
 
 ##Define local functions
 
-def joinStoresAndBRMDL(workspace,storesFeatureClass, joinField1, joinTable, joinField2):
+def joinStoresAndBRMDL(_log,workspace,storesFeatureClass, joinField1, joinTable, joinField2):
     try:
         # Disable qualified field names which is the default for add join tool
         env.qualifiedFieldNames = False
@@ -71,13 +72,13 @@ def joinStoresAndBRMDL(workspace,storesFeatureClass, joinField1, joinTable, join
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log
             print pymsg
             print "\n" +msgs
 
     return ""
 
-def createUniqueBRMD(table,field):
+def createUniqueBRMD(_log,table,field):
     try:
         data = arcpy.da.TableToNumPyArray(table, [field])
         uniqueBullringClassList = numpy.unique(data[field])
@@ -97,13 +98,15 @@ def createUniqueBRMD(table,field):
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log
             print pymsg
             print "\n" +msgs
+            _log.info( pymsg)
+            _log.info(msgs)
 
     return uniqueBullringClassList
 
-def createCampusBuffer(campusBoundaryFeatureClass, campusBoundaryBuffer, bufferDistance, linearUnit, sideType, endType):
+def createCampusBuffer(_log,campusBoundaryFeatureClass, campusBoundaryBuffer, bufferDistance, linearUnit, sideType, endType):
     try:
         # Buffer the campus boundary based on the bullring class buffer distance provided
         bufferDistance2 = str(bufferDistance) + " " + str(linearUnit)
@@ -129,10 +132,12 @@ def createCampusBuffer(campusBoundaryFeatureClass, campusBoundaryBuffer, bufferD
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info(pymsg)
+            _log.info(msgs)
 
     return ""
 
-def intersectBullsRing(workspace,storesFeatureLayer,collegiateField, campusBoundaryBuffer, bullRingClass):
+def intersectBullsRing(_log, workspace,storesFeatureLayer,collegiateField, campusBoundaryBuffer, bullRingClass):
     try:
         #Do an intersect to get Bulls Rings collegiate stores
         arcpy.SelectLayerByLocation_management(storesFeatureLayer, 'intersect', campusBoundaryBuffer, "","SUBSET_SELECTION")
@@ -140,14 +145,17 @@ def intersectBullsRing(workspace,storesFeatureLayer,collegiateField, campusBound
         # Determine the number of selected features in the stores feature layer
         # Syntax: arcpy.GetCount_management (in_rows)
         featCount = arcpy.GetCount_management(storesFeatureLayer)
-        print "Number of store features: {0}  that intersect bull Ring class {1}".format(featCount,bullRingClass)
+
+        message = "Number of store features: {0}  that intersect bull Ring class {1}".format(featCount,bullRingClass)
+        _log.info(message)
+        print message
 
         #Define the fields object for the update cursor
         fields = (collegiateField)
 
         #Run an update cursor on the collegiate definition field name
 
-        updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, Configurations.Configurations_bullsRing)
+        updateCollegiateFieldWithBullsRing(_log,workspace,storesFeatureLayer, fields, Configurations.Configurations_bullsRing)
 
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
@@ -165,11 +173,13 @@ def intersectBullsRing(workspace,storesFeatureLayer,collegiateField, campusBound
 
             ##For debugging purposes only
             ##To be commented on python script scheduling in Windows
+            _log.info(pymsg)
+            _log.info(msgs)
             print pymsg
             print "\n" +msgs
     return ""
 
-def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, updateValue):
+def updateCollegiateFieldWithBullsRing(_log,workspace,storesFeatureLayer, fields, updateValue):
     try:
         # Start an edit session. Must provide the workspace.
         edit = arcpy.da.Editor(workspace)
@@ -215,13 +225,17 @@ def updateCollegiateFieldWithBullsRing(workspace,storesFeatureLayer, fields, upd
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log,
             print pymsg
             print "\n" +msgs
 
+			#Log file
+            _log.info( pymsg)
+            _log.info(msgs)
+
     return ""
 
-def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,fields):
+def updateIPEDSID(_log,workspace,storesFeatureClass,campusBoundary,fields):
     try:
         # execute the function
         arcpy.Near_analysis(storesFeatureClass, campusBoundary)
@@ -299,13 +313,15 @@ def updateIPEDSID(workspace,storesFeatureClass,campusBoundary,fields):
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log
             print pymsg
             print "\n" +msgs
+            _log.info( pymsg)
+            _log (msgs)
 
     return ""
 
-def executeBullsRings():
+def executeBullsRings(_log):
     try:
         ## Set overwrite in workspace to true
         arcpy.env.overwriteOutput = True
@@ -317,13 +333,13 @@ def executeBullsRings():
         ##  If it has then delete them since they shall be appended in the next step by joinField method
 
         #Join Field of Bulls Ring Master Data List to the potential bulls ring feature layer/class
-        joinStoresAndBRMDL(Configurations.Configurations_workspace,Configurations.Configurations_storesFeatureClass, \
+        joinStoresAndBRMDL(_log,Configurations.Configurations_workspace,Configurations.Configurations_storesFeatureClass, \
             Configurations.Configurations_collegiateJoinField, Configurations.Configurations_BRMDL, \
              Configurations.Configurations_BRMDLJoinField)
 
         # create a data dictionary from bull ring class and distance from
         #  Bull Ring Master Data list (BRMDL)
-        list = createUniqueBRMD(Configurations.Configurations_BRMDL,Configurations.Configurations_bullRingClass)
+        list = createUniqueBRMD(_log,Configurations.Configurations_BRMDL,Configurations.Configurations_bullRingClass)
 
         #For each unique distance
         for item in list:
@@ -352,7 +368,9 @@ def executeBullsRings():
                     # Determine the number of selected features in the stores feature layer
                     # Syntax: arcpy.GetCount_management (in_rows)
                     featCount = arcpy.GetCount_management(storesFeatureLayer)
-                    print "Number of features: {0}".format(featCount)
+                    msg = "Number of features: {0}".format(featCount)
+                    print msg
+                    _log.info("executeBullsRings() Function:"+ msg)
 
                     ##From Selection above,Select only non Bulls eye records for the bull ring held in variable named "item"
                     bullRingClassFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
@@ -362,11 +380,6 @@ def executeBullsRings():
 
                     #make a selection from existing selection here for the specific bull ring class
                     arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SUBSET_SELECTION", collegiateSQLExp)
-
-                    # Determine the number of selected features in the stores feature layer
-                    # Syntax: arcpy.GetCount_management (in_rows)
-                    featCount = arcpy.GetCount_management(storesFeatureLayer)
-                    print "Number of features: {0}".format(featCount)
 
                     ##Get buffer distance from the feature class
                     # Create an expression with proper delimiters for the bull ring class
@@ -396,7 +409,7 @@ def executeBullsRings():
 
 
                         #Call function to create campus buffer
-                        createCampusBuffer(Configurations.Configurations_campusBoundaryFeatureClass, BR_campusBoundaryBuffer, \
+                        createCampusBuffer(_log, Configurations.Configurations_campusBoundaryFeatureClass, BR_campusBoundaryBuffer, \
                          bufferDistance, Configurations.Configurations_linearUnit, \
                          Configurations.Configurations_sideType, Configurations.Configurations_endType)
 
@@ -406,14 +419,10 @@ def executeBullsRings():
                         bullRingClass = str(item)
 
                         #Updates of the selected records is done by calling another function within intersect called "updateCollegiateFieldWithBullsRing"
-                        intersectBullsRing(Configurations.Configurations_workspace, \
+                        intersectBullsRing(_log, Configurations.Configurations_workspace, \
                             storesFeatureLayer,Configurations.Configurations_fieldname, \
                                 BR_campusBoundaryBuffer, bullRingClass)
 
-                        #Call function to append IPEDs here
-##                        updateIPEDSID(Configurations.Configurations_workspace,storesFeatureLayer,Configurations.Configurations_IPEDSFieldName, \
-##                            BR_campusBoundaryBuffer, Configurations.Configurations_CampusBoundaryIPEDSID)
-                    ##Loop until the end and
                     print ""
             except:
                 ## Return any Python specific errors and any error returned by the geoprocessor
@@ -429,9 +438,11 @@ def executeBullsRings():
                 arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
                 ##For debugging purposes only
-                ##To be commented on python script scheduling in Windows
+                ##To be commented on python script scheduling in Windows _log
                 print pymsg
                 print "\n" +msgs
+                _log.info( pymsg)
+                _log.info(msgs)
             ##Try except contract is in the loop
 
         ##Select the non bulls eye and non bulls ring records and set
@@ -452,16 +463,11 @@ def executeBullsRings():
 
         arcpy.SelectLayerByAttribute_management(storesFeatureLayer, "SWITCH_SELECTION")
 
-        # Determine the number of selected features in the stores feature layer
-        # Syntax: arcpy.GetCount_management (in_rows)
-        featCount = arcpy.GetCount_management(storesFeatureLayer)
-        print "Number of features that are Non-Collegiate: {0}".format(featCount)
-
         #set update value to 2 or figure defined in Config.ini for non-collegiate records
         codedValue = str(Configurations.Configurations_nonCollegiate)
 
         #Call function to update collegiate field to value 2
-        updateCollegiateFieldWithBullsRing(Configurations.Configurations_workspace,storesFeatureLayer, \
+        updateCollegiateFieldWithBullsRing(_log,Configurations.Configurations_workspace,storesFeatureLayer, \
             Configurations.Configurations_fieldname,  codedValue)
 
         #delete the in memory feature layer just in case we need to recreate
@@ -484,10 +490,11 @@ def executeBullsRings():
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log
             print pymsg
             print "\n" +msgs
-
+            _log.info( pymsg)
+            _log.info(msgs)
     return ""
 ##---End of definition for local functions
 
@@ -498,7 +505,7 @@ if __name__ == '__main__':
     main()
 
     #Run executor
-    executeBullsRings()
+    executeBullsRings(_log)
 
     #Updates IPEDSID
-    updateIPEDSID(workspace,storesFeatureClass,campusBoundary,fields)
+    updateIPEDSID(_log,workspace,storesFeatureClass,campusBoundary,fields)

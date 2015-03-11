@@ -13,18 +13,17 @@ import arcpy
 import traceback
 from arcpy import env
 import Configurations
+import logging
 
 ##------------------Beginning of Functions--------------------------------------------
 
-def addField(featureclass, fieldname, fieldAlias,fieldType):
-
+def addField(_log, featureclass, fieldname, fieldAlias,fieldType):
     try:
         # Execute AddField twice for two new fields
         arcpy.AddField_management(featureclass, fieldname, fieldType, "", "", "",
                                   fieldAlias, "NULLABLE")
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
-            ##
             tb = sys.exc_info()[2]
             tbinfo = traceback.format_tb(tb)[0]
             pymsg = "PYTHON ERRORS:\n addField Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
@@ -40,12 +39,13 @@ def addField(featureclass, fieldname, fieldAlias,fieldType):
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info("addField in Utility_Functions "+pymsg)
+            _log.info("addField in Utility_Functions "+msgs)
 
     return ""
 
 ## Add Domains
-def addDomain(workspace, domainName,domainDescription,fieldType, domainType):
-
+def addDomain(_log, workspace, domainName,domainDescription,fieldType, domainType):
     try:
         # Process: Create the coded value domain
         arcpy.CreateDomain_management(workspace, domainName, domainDescription, fieldType, domainType)
@@ -68,12 +68,13 @@ def addDomain(workspace, domainName,domainDescription,fieldType, domainType):
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info("addDomain in Utility_Functions "+pymsg)
+            _log.info("addDomain in Utility_Functions "+msgs)
 
     return ""
 
 ## Add Values to collegiate Domain
-def addValuesToDomain(workspace, domainName, domainDictionary):
-
+def addValuesToDomain(_log, workspace, domainName, domainDictionary):
     try:
         # Process: Add valid material types to the domain
         #use a for loop to cycle through all the domain codes in the dictionary
@@ -98,9 +99,12 @@ def addValuesToDomain(workspace, domainName, domainDictionary):
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info("addValuesToDomain in Utility_Functions "+pymsg)
+            _log.info("addValuesToDomain in Utility_Functions "+msgs)
+
     return ""
 
-def assignDomainToField(storesFeatureClass,fieldname, domainName ):
+def assignDomainToField(_log, storesFeatureClass,fieldname, domainName ):
 
     try:
         # Process: Constrain the collegiate definition values of the field
@@ -124,12 +128,13 @@ def assignDomainToField(storesFeatureClass,fieldname, domainName ):
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info("assignDomainToField in Utility_Functions "+pymsg)
+            _log.info("assignDomainToField in Utility_Functions "+msgs)
 
     return ""
 
 ##Backup function
-def backupInitialStoresFC (workspace, workspaceScratch, storesFeatureClass):
-
+def backupInitialStoresFC (_log, workspace, workspaceScratch, storesFeatureClass):
     try:
         ## Set overwrite in workspace to true
         arcpy.env.overwriteOutput = True
@@ -169,12 +174,12 @@ def backupInitialStoresFC (workspace, workspaceScratch, storesFeatureClass):
         # Make a layer from stores feature class from the scratch workspace
         arcpy.MakeFeatureLayer_management(storesFeatureClassOld, backupInitialStoresFeatureLayer)
 
-        ##Below code checks if an exisitng feature class of geocodes/stores nature exists
+        ##Below code checks if an existing feature class of geocodes/stores nature exists
         ## If it exists then it copies it
-        ## If it doesnt then it backs-up from scratch geodatabase
+        ## If it doesn't then it backs-up from scratch geodatabase
 
         if existingStoresFeatureClass == "" :
-            #variable pointer to the in-memory feature layer for exisiting feature class
+            #variable pointer to the in-memory feature layer for existing feature class
             existingStoresFeatureLayer = os.path.basename(storesFeatureClassOld) + "_lyr0"
 
             # Make a layer from stores feature class from the scratch workspace
@@ -221,10 +226,12 @@ def backupInitialStoresFC (workspace, workspaceScratch, storesFeatureClass):
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info("backupInitialStoresFC in Utility_Functions "+pymsg)
+            _log.info("backupInitialStoresFC in Utility_Functions "+msgs)
 
     return ""
 
-def deleteBRMDLFieldsInStores(BRMDL,storesFeatureClass):
+def deleteBRMDLFieldsInStores(_log, BRMDL,storesFeatureClass):
     try:
 
         # Describe the input (need to test the dataset and data types)
@@ -263,26 +270,21 @@ def deleteBRMDLFieldsInStores(BRMDL,storesFeatureClass):
         ##To be commented on python script scheduling in Windows
         print pymsg
         print "\n" +msgs
+        _log.info("deleteBRMDLFieldsInStores in Utility_Functions "+pymsg)
+        _log.info("deleteBRMDLFieldsInStores in Utility_Functions "+msgs)
 
     return ""
 
 ## Export feature locations and attributes to an ASCII text file
-def exportToASCII(workspace,input_features, export_ASCII):
-
-    ##Set the overwriteOutput environment setting to True
-    env.overwriteOutput = True
-
-    #Transfer Field Domain Descriptions
-    env.transferDomains = True
-
-    # Local variables...
-    #workspace = r"E:\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Sample_Data\collegiate_sample_data.gdb"
-
-    #input_features = "geocode_result"
-
-    #export_ASCII = os.path.dirname(workspace) + "/collegiate_store.txt"
-
+def exportToASCII(_log, workspace,input_features, export_ASCII):
     try:
+        arcpy.env.workspace =workspace
+		##Set the overwriteOutput environment setting to True
+        env.overwriteOutput = True
+
+		#Transfer Field Domain Descriptions
+        env.transferDomains = True
+
         # Set the current workspace (to avoid having to specify the full path to the feature classes each time)
         arcpy.env.workspace = workspace
 
@@ -307,117 +309,133 @@ def exportToASCII(workspace,input_features, export_ASCII):
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info("Forcefully deletes the in memory stores feature layer "+pymsg)
+            _log.info("Forcefully deletes the in memory stores feature layer "+msgs)
 
     return ""
 
 #Function returns a dictionary
-def domainDictionary(workspace,domainName):
-    domains = arcpy.da.ListDomains(workspace)
-
+def domainDictionary(_log, workspace,domainName):
     #create an empty dictionary
     domainDict = {}
+    try:
+		domains = arcpy.da.ListDomains(workspace)
+		for domain in domains:
+			#print('Domain name: {0}'.format(domain.name))
+			if domain.name == domainName:
+				coded_values = domain.codedValues
+				for val, desc in coded_values.iteritems():
+					print('{0} : {1}'.format(val, desc))
+					domainDict[val] = desc
+				break
+    except:
+            ## Return any Python specific errors and any error returned by the geoprocessor
+            ##
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\n Utility_Functions Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
+                    str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
+                    "Line {0}".format(tb.tb_lineno)
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
-    for domain in domains:
-        #print('Domain name: {0}'.format(domain.name))
-        if domain.name == domainName:
-            coded_values = domain.codedValues
-            for val, desc in coded_values.iteritems():
-                print('{0} : {1}'.format(val, desc))
-                domainDict[val] = desc
-            break
+            ##Add custom informative message to the Python script tool
+            arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
+            arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
+
+            ##For debugging purposes only
+            ##To be commented on python script scheduling in Windows
+            print pymsg
+            print "\n" +msgs
+            _log.info("domainDictionary in Utility_Functions "+pymsg)
+            _log.info("domainDictionary in Utility_Functions "+msgs)
 
     return domainDict
+
 ##Export to text  file via search cursor
 # workspace: data source for the stores feature class
 # input features: the feature class containing data to be exported
 # fields: fields that will be included in the export
 # text file parameter : the path to the output file
-def exportToTextfile(workspace,input_features, fields, exportFieldsAlias,textfile):
+def exportToTextfile(_log, workspace,input_features, fields, exportFieldsAlias,textfile):
+    try:
+		##Set the overwriteOutput environment setting to True
+		env.overwriteOutput = True
 
-    ##Set the overwriteOutput environment setting to True
-    env.overwriteOutput = True
+		#Transfer Field Domain Descriptions
+		env.transferDomains = True
 
-    #Transfer Field Domain Descriptions
-    env.transferDomains = True
+		# Local variables...
+		#workspace = r"E:\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Sample_Data\collegiate_sample_data.gdb"
 
-    # Local variables...
-    #workspace = r"E:\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Sample_Data\collegiate_sample_data.gdb"
+		# Set the current workspace (to avoid having to specify the full path to the feature classes each time)
+		arcpy.env.workspace = workspace
 
-    # Set the current workspace (to avoid having to specify the full path to the feature classes each time)
-    arcpy.env.workspace = workspace
+		#Store domain in a dictionary and access stuff on it.
+		domainDict = domainDictionary(_log,workspace,Configurations.Configurations_domainName)
 
-    #input_features = "geocode_result"
+		#Open the report text file in write mode
+		file = open (textfile, "w")
 
-    #Store domain in a dictionary and access stuff on it.
-    domainDict = domainDictionary(workspace,Configurations.Configurations_domainName)
+		##Select non-bull ring features from feature layer
+		#collegiate definition
+		collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
+			Configurations.Configurations_fieldname)
 
-    # Establish Class fields
-    #fields = yes.
+		# Select  Bulls eye records and bulls ring records only
+		collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " Or " + \
+			collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
 
-    #Define output
-    #textfile = os.path.dirname(workspace) + "/collegiate_store11.txt"
+		#If the variable is set to 1 then all records are required
+		#  else if set to 0 then on collegiate records are required
+		if Configurations.Configurations_nonCollegiateOutput  == str(1) :
+			collegiateSQLExp = ""
 
-    #Open the report text file in write mode
-    file = open (textfile, "w")
+		# Create cursor to search gas mains by material
+		with arcpy.da.SearchCursor(input_features, fields,collegiateSQLExp) as cursor:
+			for row in cursor:
+				#Get field values
+				objectid = str(row[0])
+				storeID = str(row[1])
+				collegiate = str(row[2])
+				bullringClass = str(row[3])
+				ipedsID = str(row[4])
 
-    #Add Header lines to report text file
-    #file.write("Collegiate Store Table:\n")
+				#Write outputs to file now
+				collegiateDescription = str(domainDict[int(collegiate)])
 
-    #Loop through the fields aliases object for column headers
-    ##    for field in exportFieldsAlias:
-    ##        file.write(field + " ")
+				#If non collegiate then write empty string
+				if collegiate == Configurations.Configurations_nonCollegiate:
+					collegiateDescription = ""
+					ipedsID = ""
 
-    #file.write("\n") #Force new line after writing the column headers
+				#Write to file as below
+				# Store_is "Update type" "Flag Name" "Value"
+				file.write(storeID + "\t" + "U" + "\t" + "FLG_AREA" + "\t" + collegiateDescription + "\n") #with bullring
+				file.write(storeID + "\t" + "U" + "\t" + "YUS_FLG_COLLEGE" + "\t" + ipedsID + "\n") #with IPED
+		#Close file to release handle
+		file.close()
 
-    #Custom header as per requirements from SAP
-    #Store_is	Update type	Flag Name	Value
-##    file.write("Store ID"+ "\t" +  \
-##        "Update Type"+ "\t" \
-##        "Flag Name"+ "\t" \
-##        "Value"+ "\t" \
-##        + "\n")
+    except:
+            ## Return any Python specific errors and any error returned by the geoprocessor
+            ##
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\n Utility_Functions Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
+                    str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
+                    "Line {0}".format(tb.tb_lineno)
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
 
-    #file.write("OBJECT ID" + " " + "Store ID"+ " " + "Collegiate" + " " + "Bullring Class" + " "+ "IPEDS ID"+ "\n")
+            ##Add custom informative message to the Python script tool
+            arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
+            arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
-    ##Select non-bull ring features from feature layer
-    #collegiate definition
-    collegiateFieldwithDelimeter = arcpy.AddFieldDelimiters(Configurations.Configurations_workspace, \
-        Configurations.Configurations_fieldname)
+            ##For debugging purposes only
+            ##To be commented on python script scheduling in Windows
+            print pymsg
+            print "\n" +msgs
+            _log.info("exportToTextfile in Utility_Functions "+pymsg)
+            _log.info("exportToTextfile in Utility_Functions "+msgs)
 
-    # Select  Bulls eye records and bulls ring records only
-    collegiateSQLExp =  collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsEye) + " Or " + \
-        collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
-
-    #If the variable is set to 1 then all records are required
-    #  else if set to 0 then on collegiate records are required
-    if Configurations.Configurations_nonCollegiateOutput  == str(1) :
-        collegiateSQLExp = ""
-
-    # Create cursor to search gas mains by material
-    with arcpy.da.SearchCursor(input_features, fields,collegiateSQLExp) as cursor:
-        for row in cursor:
-            #Get field values
-            objectid = str(row[0])
-            storeID = str(row[1])
-            collegiate = str(row[2])
-            bullringClass = str(row[3])
-            ipedsID = str(row[4])
-
-            #Write outputs to file now
-            #file.write(objectid + " " + storeID + " " + collegiate + " " + bullringClass + " " + ipedsID + "\n")
-            collegiateDescription = str(domainDict[int(collegiate)]) # Substitute code for description
-
-            #If non collegiate then write empty string
-            if collegiate == Configurations.Configurations_nonCollegiate:
-                collegiateDescription = ""
-                ipedsID = ""
-
-            #Write to file as below
-            # Store_is "Update type" "Flag Name" "Value"
-            file.write(storeID + "\t" + "U" + "\t" + "FLG_AREA" + "\t" + collegiateDescription + "\n") #with bullring
-            file.write(storeID + "\t" + "U" + "\t" + "YUS_FLG_COLLEGE" + "\t" + ipedsID + "\n") #with IPED
-    #Close file to release handle
-    file.close()
 
     #Return Nothing
     return ""
@@ -429,21 +447,21 @@ if __name__ == '__main__':
 
     main()
 
-    addField(featureclass, fieldname, fieldAlias,fieldType)
+    addField(_log,featureclass, fieldname, fieldAlias,fieldType)
 
-    addDomain(workspace, domainName,domainDescription,fieldType, domainType)
+    addDomain(_log, workspace, domainName,domainDescription,fieldType, domainType)
 
-    addValuesToDomain(workspace, domainName, domainDictionary)
+    addValuesToDomain(_log,workspace, domainName, domainDictionary)
 
-    assignDomainToField(storesFeatureClass,fieldname, domainName )
+    assignDomainToField(_log,storesFeatureClass,fieldname, domainName )
 
-    backupInitialStoresFC (workspace, workspaceScratch, storesFeatureClass)
+    backupInitialStoresFC (_log,workspace, workspaceScratch, storesFeatureClass)
 
-    deleteBRMDLFieldsInStores(BRMDL,storesFeatureClass)
+    deleteBRMDLFieldsInStores(_log,BRMDL,storesFeatureClass)
 
     #Function that exports to ASCII
-    exportToASCII(workspace,input_features, export_ASCII)
+    exportToASCII(_log,workspace,input_features, export_ASCII)
 
     #Exports to file but using search cursor
-    exportToTextfile(workspace,input_features, fields, exportFieldsAlias, textfile)
+    exportToTextfile(_log, workspace,input_features, fields, exportFieldsAlias, textfile)
 

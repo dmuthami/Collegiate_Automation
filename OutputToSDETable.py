@@ -14,12 +14,14 @@ import arcpy
 import traceback
 from arcpy import env
 
+#Logging module
+import logging
 
 #import custom module
 import Configurations
 from Utility_Functions import  domainDictionary as getCollegiateDomainDictionary
 
-def fieldMappingsForCollegiateStore1(workspace,intable,fields,sdeTable):
+def fieldMappingsForCollegiateStore1(_log,workspace,intable,fields,sdeTable):
     try:
         #Select non-bull ring features from feature layer
         #collegiate definition
@@ -79,7 +81,7 @@ def fieldMappingsForCollegiateStore1(workspace,intable,fields,sdeTable):
 
         ##Update Fields
         #Get domain descriptions. need to substitute codes with the descriptions
-        domainDict = getCollegiateDomainDictionary(workspace,Configurations.Configurations_domainName)
+        domainDict = getCollegiateDomainDictionary(_log, workspace,Configurations.Configurations_domainName)
 
         # Start an edit session. Must provide the workspace.
         edit = arcpy.da.Editor(workspace)
@@ -142,9 +144,12 @@ def fieldMappingsForCollegiateStore1(workspace,intable,fields,sdeTable):
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+			#Log messages
+            _log.info("fieldMappingsForCollegiateStore1 function : " +pymsg)
+            _log.info("fieldMappingsForCollegiateStore1 function : " +msgs)
     return ""
 
-def fieldMappingsForCollegiateStore2(workspace,intable,fields,sdeTable):
+def fieldMappingsForCollegiateStore2(_log,workspace,intable,fields,sdeTable):
     try:
         #Select non-bull ring features from feature layer
         #collegiate definition
@@ -156,7 +161,7 @@ def fieldMappingsForCollegiateStore2(workspace,intable,fields,sdeTable):
             collegiateFieldwithDelimeter + " = " + str(Configurations.Configurations_bullsRing)
 
         #If the variable is set to 1 then all records are required
-        #  else if set to 0 then on collegiate records are required
+        #  else if set to 0 then only collegiate records are required
         if Configurations.Configurations_nonCollegiateOutput  == str(1)  :
             collegiateSQLExp = ""
 
@@ -171,7 +176,7 @@ def fieldMappingsForCollegiateStore2(workspace,intable,fields,sdeTable):
 
         fms = arcpy.FieldMappings()
 
-        # Get the field names of vegetation type and diameter for both original
+        # Get the field names of Store ID Field and IPEDS Field Name for both original
         # files
         storeid_type = Configurations.Configurations_storeIDField
         value_type = Configurations.Configurations_IPEDSFieldName
@@ -254,13 +259,16 @@ def fieldMappingsForCollegiateStore2(workspace,intable,fields,sdeTable):
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log
             print pymsg
             print "\n" +msgs
+			#Log messages
+            _log.info("fieldMappingsForCollegiateStore2 function : " +pymsg)
+            _log.info("fieldMappingsForCollegiateStore2 function : " +msgs)
 
     return ""
 
-def truncateFunction(truncateDataset):
+def truncateFunction(_log,truncateDataset):
     try:
         arcpy.TruncateTable_management(truncateDataset)
     except:
@@ -281,13 +289,16 @@ def truncateFunction(truncateDataset):
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info( "truncateFunction Function: "+pymsg)
+            _log.info( "truncateFunction Function: "+msgs)
+
     return ""
 
 #function appends records from the file geodatabase into the sde table
-def appendSDETable(table,sdeTable):
+def appendSDETable(_log,table,sdeTable):
     try:
-        #truncate the sde table to accomodate new records
-        truncateFunction(sdeTable)
+        #truncate the sde table to accommodate new records
+        truncateFunction(_log,sdeTable)
 
         #Set append parameters
         schemaType = "NO_TEST"
@@ -311,13 +322,16 @@ def appendSDETable(table,sdeTable):
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log
             print pymsg
             print "\n" +msgs
+            _log.info("appendSDETable Function : "+ pymsg)
+            _log.info("appendSDETable Function : " + msgs)
+
     return ""
 
-##Ouput collegiate defintion table into table
-def outputSDETable():
+##Output collegiate definition table into table
+def outputSDETable(_log):
     try:
         #Uncomment next line if an only if you want to debug code
         #Configurations.setParameters(r"E:\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Python_Scripts\GitHub\Collegiate_Automation\Config.ini")
@@ -328,11 +342,11 @@ def outputSDETable():
         # Set data path
         intable = Configurations.Configurations_storesFeatureClass
 
-        #Fields required to updated after supplying Bullseye, Bullsring operation
+        #Fields required to be updated after supplying Bullseye, Bullsring operation
         fields1 =[Configurations.Configurations_valueFieldName,Configurations.Configurations_flagNameFieldName,\
             Configurations.Configurations_updateTypeFieldName]
 
-        #Fields required to updated after supplying the IPEDS_ID
+        #Fields required to be updated after supplying the IPEDS_ID
         fields2 =[Configurations.Configurations_flagNameFieldName, \
             Configurations.Configurations_updateTypeFieldName]
 
@@ -340,16 +354,16 @@ def outputSDETable():
         sdeTable = Configurations.Configurations_sdeTable
 
         #call function to truncate records in existing collegiate_store table
-        truncateFunction(sdeTable)
+        truncateFunction(_log, sdeTable)
 
         #Append BullsEye and BullsRing dataset
-        fieldMappingsForCollegiateStore1(Configurations.Configurations_workspace,intable,fields1,sdeTable)
+        fieldMappingsForCollegiateStore1(_log, Configurations.Configurations_workspace,intable,fields1,sdeTable)
 
         #Append IPEDS ID Value
-        fieldMappingsForCollegiateStore2(Configurations.Configurations_workspace,intable,fields1,sdeTable)
+        fieldMappingsForCollegiateStore2(_log, Configurations.Configurations_workspace,intable,fields1,sdeTable)
 
         #Call function to output to append to sde table
-        appendSDETable(sdeTable,Configurations.Configurations_realSDETable)
+        appendSDETable(_log, sdeTable,Configurations.Configurations_realSDETable)
 
     except:
             ## Return any Python specific errors and any error returned by the geoprocessor
@@ -366,9 +380,12 @@ def outputSDETable():
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log
+
             print pymsg
             print "\n" +msgs
+            _log.info("outputSDETable Function : "+ pymsg)
+            _log.info("outputSDETable Function : "+msgs)
     return ""
 
 def main():
@@ -377,6 +394,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-    #Write to SDE table
-    outputSDETable()
+    #Call Write to SDE table
+    outputSDETable(_log)
 

@@ -13,6 +13,11 @@ import ConfigParser
 #Import global traceback here
 import traceback
 
+import logging
+
+#Workspace global variables
+Configurations_cat_logfile = ""
+
 #Workspace global variables
 Configurations_workspace = ""
 Configurations_workspaceScratch = ""

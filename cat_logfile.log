@@ -1,0 +1,37 @@
+2015-03-11 23:15:53,039 INFO 
+------------------------------------------------------------------
+Start Time : -15-03-11_23-15-53
+------------------------------------------------------------------
+
+2015-03-11 23:16:29,016 INFO addDomain in Utility_Functions PYTHON ERRORS:
+ addDomain Function : Traceback Info:
+  File "C:\DAVID-MUTHAMI\GIS Data\RED-BULL\Mapping Portal Enhancement - Release 1.0\4. Implementation\4.1 CODE\GIS\Collegiate_Definition_Automation\Python_Scripts\GitHub\Collegiate_Automation\Utility_Functions.py", line 51, in addDomain
+    arcpy.CreateDomain_management(workspace, domainName, domainDescription, fieldType, domainType)
+
+Error Info:
+    <class 'arcgisscripting.ExecuteError'>: Failed to execute. Parameters are not valid.
+ERROR 000192: Invalid value for Domain Name
+Failed to execute (CreateDomain).
+
+Line 51
+2015-03-11 23:16:29,019 INFO addDomain in Utility_Functions Geoprocessing  Errors :
+Failed to execute. Parameters are not valid.
+ERROR 000192: Invalid value for Domain Name
+Failed to execute (CreateDomain).
+
+
+2015-03-11 23:16:47,444 INFO executeBullsRings() Function:Number of features: 655
+2015-03-11 23:16:50,973 INFO Number of store features: 8  that intersect bull Ring class 1.0
+2015-03-11 23:16:51,721 INFO executeBullsRings() Function:Number of features: 655
+2015-03-11 23:16:54,943 INFO Number of store features: 0  that intersect bull Ring class 2.0
+2015-03-11 23:16:55,561 INFO executeBullsRings() Function:Number of features: 655
+2015-03-11 23:16:58,359 INFO Number of store features: 0  that intersect bull Ring class 3.0
+2015-03-11 23:16:59,038 INFO executeBullsRings() Function:Number of features: 655
+2015-03-11 23:17:02,157 INFO Number of store features: 0  that intersect bull Ring class 4.0
+2015-03-11 23:17:03,079 INFO Bull ring execution is successful
+2015-03-11 23:17:18,559 INFO Collegiate Definition run successfully
+2015-03-11 23:17:18,568 INFO 
+------------------------------------------------------------------
+End Time : -15-03-11_23-17-18
+------------------------------------------------------------------
+

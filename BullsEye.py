@@ -14,6 +14,9 @@ import os, sys
 import arcpy
 import traceback
 from arcpy import env
+#Logging module
+import logging
+
 
 ##Custom module containing functions
 import Configurations
@@ -26,7 +29,7 @@ from BullsRing import updateIPEDSID as updateIPEDSIDForBullsEye
 ## Update collegiate definition field to 0
 ## and hit out
 ##
-def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryFeatureClass, bullsEye):
+def intersect(_log,workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryFeatureClass, bullsEye):
     try:
         try:
             ##Try creating the below layer. If it exists in memory then an exception will be thrown
@@ -57,9 +60,11 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
                 arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
                 ##For debugging purposes only
-                ##To be commented on python script scheduling in Windows
+                ##To be commented on python script scheduling in Windows _log
                 print pymsg
                 print "\n" +msgs
+                _log.info("Forcefully deletes the in memory stores feature layer "+pymsg)
+                _log.info("Forcefully deletes the in memory stores feature layer "+msgs)
 
         # Make a layer from stores feature class
         arcpy.MakeFeatureLayer_management(storesFeatureClass, storesFeatureLayer)
@@ -74,11 +79,7 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
         domainsCodedValue = Configurations.Configurations_bullsEye
 
         #Call and update bulls eye
-        updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields,domainsCodedValue)
-
-        #Call function to update the IPEDS ID
-##        updateIPEDSID(workspace,storesFeatureLayer,Configurations.Configurations_IPEDSFieldName,campusBoundaryFeatureClass, \
-##         Configurations.Configurations_CampusBoundaryIPEDSID)
+        updateCollegiateFieldWithBullsEye(_log,workspace,storesFeatureLayer, fields,domainsCodedValue)
 
         #delete the in memory feature layer just in case we need to recreate
         # feature layer or maybe run script an additional time
@@ -101,10 +102,12 @@ def intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryF
             ##To be commented on python script scheduling in Windows
             print pymsg
             print "\n" +msgs
+            _log.info("Intersect Function in BullsEye.py module \n"+pymsg)
+            _log.info("Intersect Function in BullsEye.py  module \n"+msgs)
 
     return ""
 
-def updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields, domainsCodedValue):
+def updateCollegiateFieldWithBullsEye(_log,workspace,storesFeatureLayer, fields, domainsCodedValue):
 
     try:
         # Start an edit session. Must provide the workspace.
@@ -148,17 +151,42 @@ def updateCollegiateFieldWithBullsEye(workspace,storesFeatureLayer, fields, doma
             arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
 
             ##For debugging purposes only
-            ##To be commented on python script scheduling in Windows
+            ##To be commented on python script scheduling in Windows _log
             print pymsg
             print "\n" +msgs
+            _log.info("updateCollegiateFieldWithBullsEye Function in BullsEye.py module \n " +pymsg)
+            _log.info("updateCollegiateFieldWithBullsEye Function in BullsEye.py module \n " +msgs)
 
     return ""
 
 #Function calls another module that updates the IPEDS ID
-def updateIPEDSID(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS):
+def updateIPEDSID(_log, workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS):
+    try:
 
-    #Function calls another module that updates the IPEDS ID
-    updateIPEDSIDForBullsEye(workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS)
+        #Function calls another module that updates the IPEDS ID
+        updateIPEDSIDForBullsEye(_log, workspace,storesFeatureLayer,IPEDSID,campusBoundaryBuffer, campusBoundaryIPEDS)
+
+    except:
+            ## Return any Python specific errors and any error returned by the geoprocessor
+            ##
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\n updateCollegiateFieldWithBullsEye Function : Traceback Info:\n" + tbinfo + "\nError Info:\n    " + \
+                    str(sys.exc_type)+ ": " + str(sys.exc_value) + "\n" +\
+                    "Line {0}".format(tb.tb_lineno)
+            msgs = "Geoprocessing  Errors :\n" + arcpy.GetMessages(2) + "\n"
+
+            ##Add custom informative message to the Python script tool
+            arcpy.AddError(pymsg) #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
+            arcpy.AddError(msgs)  #Add error message to the Python script tool(Progress dialog box, Results windows and Python Window).
+
+            ##For debugging purposes only
+            ##To be commented on python script scheduling in Windows _log
+            print pymsg
+            print "\n" +msgs
+            _log.info("updateIPEDSID Function in BullsEye.py module \n " +pymsg)
+            _log.info("updateIPEDSID Function in BullsEye.py module \n " +msgs)
+
 
     return ""
 ##-------------Main----------------
@@ -168,4 +196,4 @@ def main():
 if __name__ == '__main__':
     main()
     ##intersect
-    intersect(workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryFeatureClass)
+    intersect(_log,workspace,storesFeatureClass,collegiate_fieldname, campusBoundaryFeatureClass)
